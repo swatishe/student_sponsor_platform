@@ -10,8 +10,7 @@ import ProjectDetail   from '@/pages/projects/ProjectDetail'
 import NewProject      from '@/pages/projects/NewProject'
 import Messaging       from '@/pages/messaging/Messaging'
 import Profile         from '@/pages/profile/Profile'
-import Applications    from '@/pages/applications/Applications'
-import Admin           from '@/pages/admin/Admin'
+
 
 export default function App() {
   return (
@@ -30,8 +29,6 @@ export default function App() {
             <Route path="/my-projects/new"   element={<ProtectedRoute roles={["sponsor","faculty"]}><NewProject /></ProtectedRoute>} />
             <Route path="/messages"          element={<Messaging />} />
             <Route path="/profile"           element={<Profile />} />
-            <Route path="/applications"      element={<Applications />} />
-            <Route path="/admin"             element={<ProtectedRoute roles={["admin"]}><Admin /></ProtectedRoute>} />
           </Route>
         </Route>
 
