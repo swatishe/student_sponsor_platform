@@ -27,7 +27,7 @@ export default function App() {
             <Route path="/projects"          element={<ProjectsList />} />
             <Route path="/projects/:id"      element={<ProjectDetail />} />
             <Route path="/my-projects/new"   element={<ProtectedRoute roles={["sponsor","faculty"]}><NewProject /></ProtectedRoute>} />
-            {/* <Route path="/messages"          element={<Messaging />} /> */}
+            <Route path="/messages"          element={<Messaging />} />
             <Route path="/profile"           element={<Profile />} />
           </Route>
         </Route>
