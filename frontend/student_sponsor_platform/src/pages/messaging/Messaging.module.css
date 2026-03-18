@@ -1,0 +1,114 @@
+/* src/pages/messaging/Messaging.module.css */
+
+.container {
+  display: flex;
+  height: calc(100vh - 100px);
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+
+/* ── Sidebar ── */
+.sidebar {
+  width: 300px;
+  border-right: 1px solid var(--border-color);
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  background: var(--bg-primary);
+}
+.sidebarHeader {
+  padding: 18px 16px 14px;
+  border-bottom: 1px solid var(--border-color);
+}
+.sidebarHeader h2 { font-size: 1rem; }
+
+.convList { flex: 1; overflow-y: auto; }
+
+.convItem {
+  width: 100%; display: flex; align-items: center; gap: 10px;
+  padding: 12px 14px; border: none; background: none; cursor: pointer;
+  text-align: left; transition: background .15s;
+  border-bottom: 1px solid rgba(255,255,255,0.03);
+}
+.convItem:hover { background: rgba(255,255,255,0.04); }
+.convActive     { background: rgba(108,99,255,0.1) !important; }
+
+.convInfo { flex: 1; min-width: 0; }
+.convName {
+  font-size: 0.875rem; font-weight: 600; color: var(--text-primary);
+  display: flex; align-items: center; gap: 6px;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.unreadBadge {
+  min-width: 18px; height: 18px; border-radius: 100px;
+  background: var(--accent-primary); color: white;
+  font-size: 0.68rem; font-weight: 700;
+  display: flex; align-items: center; justify-content: center; padding: 0 4px; flex-shrink: 0;
+}
+.convPreview {
+  font-size: 0.74rem; color: var(--text-muted);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 2px;
+}
+.convTime { font-size: 0.67rem; color: var(--text-muted); flex-shrink: 0; align-self: flex-start; margin-top: 3px; }
+
+/* ── Chat panel ── */
+.chat { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+
+.chatHeader {
+  display: flex; align-items: center; gap: 12px;
+  padding: 14px 20px; border-bottom: 1px solid var(--border-color);
+  background: var(--bg-secondary);
+}
+.backBtn { display: none; background: none; border: none; color: var(--text-secondary); cursor: pointer; padding: 4px; align-items: center; }
+
+.messages { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 12px; }
+
+/* Bubbles */
+.bubble { display: flex; flex-direction: column; max-width: 68%; }
+.mine   { align-self: flex-end;   align-items: flex-end; }
+.theirs { align-self: flex-start; align-items: flex-start; }
+
+.senderName { font-size: 0.72rem; color: var(--text-muted); margin-bottom: 3px; padding: 0 4px; }
+
+.bubbleContent {
+  padding: 10px 14px; border-radius: 16px; font-size: 0.9rem; line-height: 1.5; word-break: break-word; white-space: pre-wrap;
+}
+.mine .bubbleContent    { background: var(--accent-primary); color: white; border-bottom-right-radius: 4px; }
+.theirs .bubbleContent  { background: rgba(255,255,255,0.07); color: var(--text-primary); border: 1px solid var(--border-color); border-bottom-left-radius: 4px; }
+
+.bubbleTime { font-size: 0.67rem; color: var(--text-muted); margin-top: 3px; padding: 0 4px; }
+
+/* Input bar */
+.inputBar {
+  display: flex; gap: 10px; padding: 14px 20px;
+  border-top: 1px solid var(--border-color);
+  background: var(--bg-secondary); align-items: flex-end;
+}
+.messageInput {
+  flex: 1; background: rgba(255,255,255,0.05); border: 1px solid var(--border-color);
+  border-radius: 12px; padding: 10px 14px; color: var(--text-primary);
+  font-family: var(--font-body); font-size: 0.9rem; resize: none; outline: none;
+  line-height: 1.5; max-height: 120px; overflow-y: auto; transition: border-color .18s;
+}
+.messageInput:focus { border-color: var(--accent-primary); }
+.messageInput::placeholder { color: var(--text-muted); }
+.sendBtn { padding: 10px 14px; flex-shrink: 0; border-radius: 10px; }
+
+/* Empty state */
+.emptyChat {
+  flex: 1; display: flex; flex-direction: column; align-items: center;
+  justify-content: center; color: var(--text-secondary); text-align: center; padding: 40px;
+}
+.emptyChat h3 { font-size: 1.05rem; margin-bottom: 6px; color: var(--text-secondary); }
+.emptyChat p  { font-size: 0.87rem; color: var(--text-muted); max-width: 280px; }
+
+/* ── Mobile ── */
+@media (max-width: 640px) {
+  .hideMobile { display: none !important; }
+  .sidebar { width: 100%; }
+  .chat    { width: 100%; }
+  .backBtn { display: flex; }
+  .container { height: calc(100vh - 70px); border-radius: 0; border-left: none; border-right: none; }
+}

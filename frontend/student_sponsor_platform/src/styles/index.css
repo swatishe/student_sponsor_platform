@@ -1,0 +1,149 @@
+/* ============================================================
+   src/styles/index.css
+   Global design tokens, resets, and utility classes.
+   All CSS variables are defined here and consumed everywhere.
+   ============================================================ */
+
+:root {
+  /* ── Palette ── */
+  --bg-primary:      #0d0d1a;
+  --bg-secondary:    #13132b;
+  --bg-tertiary:     #1a1a3e;
+  --accent-primary:  #6c63ff;
+  --accent-hover:    #5a52e0;
+  --accent-success:  #22d3a0;
+  --accent-warning:  #f59e0b;
+  --accent-info:     #38bdf8;
+  --accent-danger:   #f43f5e;
+  --text-primary:    #e8e8f4;
+  --text-secondary:  #9090b8;
+  --text-muted:      #5a5a7a;
+  --border-color:    rgba(108,99,255,0.15);
+  --border-hover:    rgba(108,99,255,0.4);
+
+  /* ── Typography ── */
+  --font-display: 'Syne', sans-serif;
+  --font-body:    'DM Sans', sans-serif;
+
+  /* ── Shape ── */
+  --radius-sm: 6px;
+  --radius-md: 12px;
+  --radius-lg: 20px;
+
+  /* ── Shadows ── */
+  --shadow-card: 0 4px 24px rgba(0,0,0,0.4);
+  --shadow-glow: 0 0 30px rgba(108,99,255,0.15);
+}
+
+/* ── Reset ── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: var(--font-body);
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  line-height: 1.6;
+  min-height: 100vh;
+  background-image:
+    radial-gradient(ellipse at 20% 50%, rgba(108,99,255,0.04) 0%, transparent 60%),
+    radial-gradient(ellipse at 80% 20%, rgba(34,211,160,0.03) 0%, transparent 50%);
+}
+
+h1,h2,h3,h4,h5,h6 { font-family: var(--font-display); font-weight:700; line-height:1.2; color:var(--text-primary); }
+a { color:var(--accent-primary); text-decoration:none; transition:color .2s; }
+a:hover { color:var(--accent-hover); }
+input,textarea,select { font-family:var(--font-body); }
+
+/* Scrollbar */
+::-webkit-scrollbar { width:6px; height:6px; }
+::-webkit-scrollbar-track { background:var(--bg-secondary); }
+::-webkit-scrollbar-thumb { background:var(--text-muted); border-radius:3px; }
+::-webkit-scrollbar-thumb:hover { background:var(--accent-primary); }
+
+/* ── Layout utilities ── */
+.container { width:100%; max-width:1200px; margin:0 auto; padding:0 24px; }
+
+/* ── Card ── */
+.card {
+  background:var(--bg-secondary);
+  border:1px solid var(--border-color);
+  border-radius:var(--radius-lg);
+  padding:28px;
+  box-shadow:var(--shadow-card);
+  transition:border-color .2s, box-shadow .2s;
+}
+.card:hover { border-color:var(--border-hover); box-shadow:var(--shadow-glow); }
+
+/* ── Buttons ── */
+.btn {
+  display:inline-flex; align-items:center; gap:8px;
+  padding:10px 20px; border-radius:var(--radius-sm); border:none;
+  cursor:pointer; font-family:var(--font-body); font-size:0.9rem; font-weight:500;
+  transition:all .2s; white-space:nowrap; text-decoration:none;
+}
+.btn-primary  { background:var(--accent-primary); color:#fff; }
+.btn-primary:hover { background:var(--accent-hover); transform:translateY(-1px); }
+.btn-secondary { background:transparent; color:var(--text-primary); border:1px solid var(--border-color); }
+.btn-secondary:hover { border-color:var(--accent-primary); color:var(--accent-primary); }
+.btn-danger { background:rgba(244,63,94,0.15); color:var(--accent-danger); border:1px solid rgba(244,63,94,0.3); }
+.btn-danger:hover { background:rgba(244,63,94,0.25); }
+.btn:disabled { opacity:.5; cursor:not-allowed; transform:none; }
+
+/* ── Badges ── */
+.badge { display:inline-flex; align-items:center; padding:2px 10px; border-radius:100px; font-size:0.75rem; font-weight:500; }
+.badge-open      { background:rgba(34,211,160,0.15); color:var(--accent-success); }
+.badge-closed    { background:rgba(244,63,94,0.15);  color:var(--accent-danger); }
+.badge-draft     { background:rgba(144,144,184,0.15);color:var(--text-secondary); }
+.badge-completed { background:rgba(108,99,255,0.15); color:var(--accent-primary); }
+.badge-pending   { background:rgba(245,158,11,0.15); color:var(--accent-warning); }
+.badge-reviewing { background:rgba(56,189,248,0.15); color:var(--accent-info); }
+.badge-accepted  { background:rgba(34,211,160,0.15); color:var(--accent-success); }
+.badge-rejected  { background:rgba(244,63,94,0.15);  color:var(--accent-danger); }
+.badge-withdrawn { background:rgba(144,144,184,0.15);color:var(--text-muted); }
+.badge-student   { background:rgba(34,211,160,0.12); color:var(--accent-success); }
+.badge-sponsor   { background:rgba(245,158,11,0.12); color:var(--accent-warning); }
+.badge-faculty   { background:rgba(56,189,248,0.12); color:var(--accent-info); }
+.badge-admin     { background:rgba(108,99,255,0.15); color:var(--accent-primary); }
+
+/* ── Forms ── */
+.form-group { display:flex; flex-direction:column; gap:6px; margin-bottom:18px; }
+.form-label { font-size:0.85rem; font-weight:500; color:var(--text-secondary); }
+.form-input {
+  background:rgba(255,255,255,0.04); border:1px solid var(--border-color);
+  border-radius:var(--radius-sm); padding:10px 14px;
+  color:var(--text-primary); font-size:0.95rem; width:100%;
+  transition:border-color .2s, box-shadow .2s;
+}
+.form-input:focus { outline:none; border-color:var(--accent-primary); box-shadow:0 0 0 3px rgba(108,99,255,0.15); }
+.form-input::placeholder { color:var(--text-muted); }
+textarea.form-input { resize:vertical; min-height:100px; }
+select.form-input { cursor:pointer; }
+select.form-input option { background:var(--bg-secondary); }
+
+/* ── Page header ── */
+.page-header { margin-bottom:32px; }
+.page-header h1 { font-size:2rem; margin-bottom:6px; }
+.page-header p  { color:var(--text-secondary); font-size:0.95rem; }
+
+/* ── Grids ── */
+.grid-2 { display:grid; grid-template-columns:repeat(auto-fill,minmax(320px,1fr)); gap:20px; }
+.grid-3 { display:grid; grid-template-columns:repeat(auto-fill,minmax(260px,1fr)); gap:20px; }
+
+/* ── Stat card ── */
+.stat-card { background:var(--bg-secondary); border:1px solid var(--border-color); border-radius:var(--radius-md); padding:20px 24px; display:flex; flex-direction:column; gap:8px; }
+.stat-card .stat-value { font-size:2rem; font-family:var(--font-display); font-weight:800; }
+.stat-card .stat-label { font-size:0.78rem; color:var(--text-muted); text-transform:uppercase; letter-spacing:.06em; }
+
+/* ── Divider ── */
+.divider { height:1px; background:var(--border-color); margin:20px 0; }
+
+/* ── Page enter animation ── */
+@keyframes fadeInUp { from { opacity:0; transform:translateY(16px); } to { opacity:1; transform:translateY(0); } }
+.page-enter { animation:fadeInUp .3s ease forwards; }
+
+/* ── Responsive helpers ── */
+@media (max-width:768px) {
+  .page-header h1 { font-size:1.5rem; }
+  .card { padding:18px; }
+}
