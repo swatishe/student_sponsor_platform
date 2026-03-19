@@ -1,0 +1,36 @@
+# ─────────────────────────────────────────────────────────────
+# SSP Backend — Python Dependencies
+# Install with: pip install -r requirements.txt
+# ─────────────────────────────────────────────────────────────
+
+# Django core
+Django==4.2.7
+django-cors-headers==4.3.1
+django-filter==23.5
+
+# Django REST Framework + JWT
+djangorestframework==3.14.0
+djangorestframework-simplejwt==5.3.0
+
+# Django Channels (WebSockets)
+channels==4.0.0
+channels-redis==4.1.0
+daphne==4.0.0
+
+# Database
+psycopg2-binary==2.9.9
+
+# Redis client
+redis==5.0.1
+
+# Environment variables
+python-decouple==3.8
+
+# Image handling
+Pillow==10.1.0
+
+# Static files in production
+whitenoise==6.6.0
+
+# Production WSGI/ASGI servers
+gunicorn==21.2.0

@@ -1,0 +1,3 @@
+# Heroku Procfile
+# Uses daphne (ASGI) to serve both HTTP and WebSocket connections
+web: daphne -b 0.0.0.0 -p $PORT ssp_project.asgi:application
