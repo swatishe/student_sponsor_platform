@@ -1,6 +1,6 @@
 // src/components/common/StatCard.jsx
 // Dashboard stat card.
-
+//@author sshende
 export default function StatCard({ icon: Icon, value, label, color = 'var(--accent-primary)' }) {
   return (
     <div className="stat-card">

@@ -1,7 +1,7 @@
 // src/hooks/useWebSocket.js
 // Manages a single WebSocket connection lifecycle.
 // Handles connect, disconnect, reconnect, and message dispatch.
-
+//@author sshende
 import { useEffect, useRef, useCallback } from 'react'
 
 const WS_BASE = import.meta.env.VITE_WS_URL || ''

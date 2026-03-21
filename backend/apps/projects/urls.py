@@ -1,4 +1,7 @@
-"""apps/projects/urls.py"""
+"""
+apps/projects/urls.py
+@author sshende
+"""
 from django.urls import path
 from .views import ProjectListCreateView, ProjectDetailView, MyProjectsView
 

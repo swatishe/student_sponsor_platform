@@ -8,6 +8,8 @@ Roles:
   sponsor  → SponsorProfile  (company info, logo)
   faculty  → FacultyProfile  (department, research interests)
   admin    → no profile model — uses Django admin
+
+@author sshende
 """
 
 from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin, BaseUserManager

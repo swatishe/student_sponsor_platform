@@ -3,6 +3,7 @@ apps/projects/models.py
 ────────────────────────
 Project model. Created by Sponsors or Faculty.
 Students browse and apply to open projects.
+@author sshende
 """
 
 from django.db import models

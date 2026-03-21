@@ -3,6 +3,8 @@ apps/users/permissions.py
 ─────────────────────────
 Custom DRF permission classes for role-based access control.
 Import and use these in any view's permission_classes list.
+
+@author sshende
 """
 
 from rest_framework.permissions import BasePermission, SAFE_METHODS

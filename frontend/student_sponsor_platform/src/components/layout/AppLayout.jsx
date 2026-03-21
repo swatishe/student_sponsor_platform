@@ -1,6 +1,6 @@
 // src/components/layout/AppLayout.jsx
 // Sidebar navigation shell for authenticated pages.
-
+//@author sshende
 import { useState } from 'react'
 import { Outlet, NavLink, useNavigate } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'

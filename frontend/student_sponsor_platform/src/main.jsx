@@ -1,4 +1,5 @@
 // src/main.jsx — Vite/React entry point
+//@author sshende
 import React from 'react'
 import ReactDOM from 'react-dom/client'
 import { BrowserRouter } from 'react-router-dom'

@@ -1,4 +1,5 @@
 // src/pages/student/ProjectDetailPage.jsx
+//@author sshende
 import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { projectAPI, applicationAPI, messagingAPI } from '../../api/services'

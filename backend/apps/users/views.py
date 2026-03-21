@@ -2,6 +2,7 @@
 apps/users/views.py
 ────────────────────
 Views for registration, current user, profile CRUD, and admin user management.
+@author sshende
 """
 
 from rest_framework import generics, permissions, status

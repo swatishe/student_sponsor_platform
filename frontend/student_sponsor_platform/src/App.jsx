@@ -1,6 +1,6 @@
 // src/App.jsx
 // Root component — AuthProvider + all route definitions.
-
+//@author sshende
 import { Routes, Route, Navigate } from 'react-router-dom'
 import { AuthProvider, useAuth } from './context/AuthContext'
 import Spinner from './components/common/Spinner'

@@ -2,6 +2,7 @@
 apps/projects/views.py
 ───────────────────────
 Project CRUD. Sponsors/Faculty create; all authenticated users can list/read.
+@author sshende
 """
 
 from rest_framework import generics, permissions, filters

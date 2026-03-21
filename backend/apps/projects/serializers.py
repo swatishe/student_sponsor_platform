@@ -1,4 +1,6 @@
-"""apps/projects/serializers.py"""
+"""apps/projects/serializers.py
+@author sshende
+"""
 
 from rest_framework import serializers
 from django.utils import timezone

@@ -1,4 +1,5 @@
 // src/pages/student/MyApplications.jsx
+//@author sshende
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { applicationAPI } from '../../api/services'

@@ -1,6 +1,6 @@
 // src/components/common/Avatar.jsx
 // Renders initials-based avatar with role-specific colour.
-
+//@author sshende
 import { initials, roleColor } from '../../utils/helpers'
 
 /**

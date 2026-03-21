@@ -1,4 +1,5 @@
 // src/pages/auth/RegisterPage.jsx
+//@author sshende
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { authAPI } from '../../api/services'

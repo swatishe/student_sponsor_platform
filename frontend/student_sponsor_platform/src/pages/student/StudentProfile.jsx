@@ -1,4 +1,5 @@
 // src/pages/student/StudentProfile.jsx
+//@author sshende
 import { useState, useEffect } from 'react'
 import { profileAPI } from '../../api/services'
 import { useAuth } from '../../context/AuthContext'

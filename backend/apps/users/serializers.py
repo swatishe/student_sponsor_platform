@@ -2,6 +2,7 @@
 apps/users/serializers.py
 ──────────────────────────
 Serializers for User registration, profile CRUD, and password change.
+@author sshende
 """
 
 from rest_framework import serializers

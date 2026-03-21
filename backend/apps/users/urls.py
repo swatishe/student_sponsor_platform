@@ -1,4 +1,6 @@
-"""apps/users/urls.py — User & Profile URL patterns"""
+"""apps/users/urls.py — User & Profile URL patterns
+@author sshende
+"""
 
 from django.urls import path
 from .views import (
