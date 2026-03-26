@@ -1,182 +1,212 @@
-/* src/components/layout/AppLayout.module.css */
-/* Horizontal top navigation bar layout */
+/* src/components/layout/AppLayout.module.css                    */
+/* LinkedIn-style horizontal navbar with icon + label nav items  */
 
-/* ── Page shell ── */
+/* ─────────────────────────────────────────────────────────────
+   PAGE SHELL
+───────────────────────────────────────────────────────────── */
 .layout {
   display: flex;
-  flex-direction: column;   /* stack navbar → content vertically */
+  flex-direction: column;   /* navbar stacked above content */
   min-height: 100vh;
   background: var(--bg-primary);
 }
 
-/* ══════════════════════════════════════════
-   TOP NAVBAR
-══════════════════════════════════════════ */
+/* ─────────────────────────────────────────────────────────────
+   NAVBAR
+───────────────────────────────────────────────────────────── */
 .navbar {
   display: flex;
-  align-items: center;
-  height: 60px;
-  padding: 0 24px;
+  align-items: stretch;     /* children fill the full 52px height */
+  height: 52px;
+  padding: 0 20px;
   background: var(--bg-secondary);
   border-bottom: 1px solid var(--border-color);
   position: sticky;
   top: 0;
   z-index: 100;
   gap: 0;
-  /* subtle glass effect */
-  backdrop-filter: blur(12px);
 }
 
-/* ── Logo (left) ── */
-.navLogo {
+/* ─────────────────────────────────────────────────────────────
+   LOGO (left)
+───────────────────────────────────────────────────────────── */
+.logo {
   display: flex;
   align-items: center;
-  gap: 9px;
-  margin-right: 32px;
+  gap: 8px;
+  padding-right: 24px;
+  margin-right: 8px;
+  border-right: 1px solid var(--border-color);
   flex-shrink: 0;
 }
 
 .logoIcon {
-  width: 32px;
-  height: 32px;
-  border-radius: 9px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-family: var(--font-display);
-  font-weight: 800;
-  font-size: 1rem;
-  color: white;
-}
-
-.logoText {
-  font-family: var(--font-display);
-  font-weight: 800;
-  font-size: 1.15rem;
-  letter-spacing: 0.04em;
-  color: var(--text-primary);
-}
-
-/* ── Nav links (center, fills remaining space) ── */
-.navLinks {
-  display: flex;
-  align-items: center;
-  gap: 2px;
-  flex: 1;          /* push right section to the far right */
-}
-
-.navLink {
-  display: flex;
-  align-items: center;
-  gap: 7px;
-  padding: 7px 14px;
-  border-radius: var(--radius-sm);
-  color: var(--text-secondary);
-  font-size: 0.875rem;
-  font-weight: 500;
-  text-decoration: none;
-  transition: all 0.18s;
-  white-space: nowrap;
-}
-
-.navLink:hover {
-  background: rgba(108, 99, 255, 0.08);
-  color: var(--text-primary);
-}
-
-/* Active nav link — pill with bottom border indicator */
-.navLink.active {
-  background: rgba(108, 99, 255, 0.14);
-  color: var(--accent-primary);
-  font-weight: 600;
-  /* bottom border indicator */
-  box-shadow: inset 0 -2px 0 var(--accent-primary);
-}
-
-/* ── Right section (user + mobile toggle) ── */
-.navRight {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  flex-shrink: 0;
-}
-
-/* ── User dropdown button ── */
-.userDropdown {
-  position: relative;
-}
-
-.userBtn {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 6px 10px;
-  border-radius: var(--radius-md);
-  background: none;
-  border: 1px solid var(--border-color);
-  cursor: pointer;
-  transition: all 0.18s;
-  color: var(--text-primary);
-}
-
-.userBtn:hover {
-  background: rgba(108, 99, 255, 0.07);
-  border-color: var(--border-hover);
-}
-
-.userAvatar {
   width: 30px;
   height: 30px;
   border-radius: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 0.95rem;
+  color: white;
+}
+
+.logoText {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 1.1rem;
+  letter-spacing: 0.04em;
+  color: var(--text-primary);
+}
+
+/* ─────────────────────────────────────────────────────────────
+   NAV LINKS (center) — LinkedIn icon-above-label pattern
+───────────────────────────────────────────────────────────── */
+.navLinks {
+  display: flex;
+  align-items: stretch;
+  flex: 1;                  /* fills space between logo and Me */
+  gap: 0;
+}
+
+/* Each nav item is a tall clickable column */
+.navItem {
+  display: flex;
+  flex-direction: column;   /* ← icon on TOP, label below */
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  padding: 0 18px;
+  color: var(--text-secondary);
+  text-decoration: none;
+  border-bottom: 2px solid transparent;  /* placeholder for active indicator */
+  transition: color 0.15s, border-color 0.15s, background 0.15s;
+  position: relative;
+  white-space: nowrap;
+  min-width: 72px;
+}
+
+.navItem:hover {
+  color: var(--text-primary);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+/* Active state — bottom border + accent colour (LinkedIn pattern) */
+.navItemActive {
+  color: var(--accent-primary) !important;
+  border-bottom-color: var(--accent-primary) !important;
+}
+
+/* Icon sits on top */
+.navIcon {
+  flex-shrink: 0;
+  transition: color 0.15s;
+}
+
+/* Label sits below icon */
+.navLabel {
+  font-size: 0.7rem;
+  font-weight: 500;
+  line-height: 1;
+  color: inherit;
+}
+
+/* ─────────────────────────────────────────────────────────────
+   RIGHT SECTION: Me button + mobile toggle
+───────────────────────────────────────────────────────────── */
+.navRight {
+  display: flex;
+  align-items: stretch;
+  gap: 4px;
+  margin-left: 8px;
+  padding-left: 16px;
+  border-left: 1px solid var(--border-color);
+  flex-shrink: 0;
+}
+
+/* ─────────────────────────────────────────────────────────────
+   ME BUTTON (LinkedIn "Me" avatar pattern)
+───────────────────────────────────────────────────────────── */
+.meWrap {
+  position: relative;
+  display: flex;
+  align-items: stretch;
+}
+
+.meBtn {
+  display: flex;
+  flex-direction: column;   /* avatar on top, "Me ▾" below — matching nav items */
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  padding: 0 14px;
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  cursor: pointer;
+  color: var(--text-secondary);
+  transition: color 0.15s, background 0.15s;
+  min-width: 56px;
+}
+
+.meBtn:hover {
+  color: var(--text-primary);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.meBtnOpen {
+  color: var(--accent-primary);
+  border-bottom-color: var(--accent-primary);
+}
+
+/* Circular avatar (differs from nav items — circle not square) */
+.meAvatar {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   font-weight: 700;
-  font-size: 0.78rem;
+  font-size: 0.68rem;
   color: white;
   flex-shrink: 0;
 }
 
-.userMeta {
+/* "Me" label row with chevron inline */
+.meLabel {
+  font-size: 0.7rem;
+  font-weight: 500;
+  line-height: 1;
+  color: inherit;
   display: flex;
-  flex-direction: column;
-  align-items: flex-start;
+  align-items: center;
   gap: 2px;
 }
 
-.userName {
-  font-size: 0.82rem;
-  font-weight: 600;
-  color: var(--text-primary);
-  white-space: nowrap;
-}
-
-.chevron {
-  color: var(--text-muted);
+.meChevron {
+  color: inherit;
   transition: transform 0.2s;
-  flex-shrink: 0;
 }
 
-.chevronOpen {
+.meChevronOpen {
   transform: rotate(180deg);
 }
 
-/* ── Dropdown menu ── */
-.dropdownBackdrop {
-  position: fixed;
-  inset: 0;
-  z-index: 150;
-}
-
-.dropdownMenu {
+/* ─────────────────────────────────────────────────────────────
+   ME DROPDOWN
+───────────────────────────────────────────────────────────── */
+.meDropdown {
   position: absolute;
-  top: calc(100% + 8px);
+  top: calc(100% + 6px);
   right: 0;
-  min-width: 200px;
+  min-width: 240px;
   background: var(--bg-secondary);
   border: 1px solid var(--border-color);
-  border-radius: var(--radius-md);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+  border-radius: var(--radius-lg);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.45);
   z-index: 200;
   overflow: hidden;
   animation: dropIn 0.15s ease;
@@ -187,17 +217,81 @@
   to   { opacity: 1; transform: translateY(0); }
 }
 
-.dropdownHeader {
-  padding: 14px 16px;
+/* Header: large avatar + name + email + role badge */
+.meDropdownHeader {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px;
 }
 
-.dropdownDivider {
+.meDropdownAvatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 1rem;
+  color: white;
+  flex-shrink: 0;
+}
+
+.meDropdownInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+
+.meDropdownName {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.meDropdownEmail {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.meDropdownDivider {
   height: 1px;
   background: var(--border-color);
-  margin: 0;
 }
 
-.dropdownLogout {
+/* Generic dropdown item (e.g. View Profile) */
+.meDropdownItem {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 12px 16px;
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  cursor: pointer;
+  font-size: 0.875rem;
+  font-family: var(--font-body);
+  font-weight: 500;
+  text-align: left;
+  transition: background 0.15s, color 0.15s;
+}
+
+.meDropdownItem:hover {
+  background: rgba(108, 99, 255, 0.07);
+  color: var(--text-primary);
+}
+
+/* Sign out — danger colour */
+.meDropdownLogout {
   display: flex;
   align-items: center;
   gap: 10px;
@@ -210,50 +304,54 @@
   font-size: 0.875rem;
   font-family: var(--font-body);
   font-weight: 500;
-  transition: background 0.15s;
   text-align: left;
+  transition: background 0.15s;
 }
 
-.dropdownLogout:hover {
+.meDropdownLogout:hover {
   background: rgba(244, 63, 94, 0.08);
 }
 
-/* ── Mobile hamburger button ── */
-.mobileMenuBtn {
+/* ─────────────────────────────────────────────────────────────
+   MOBILE HAMBURGER TOGGLE
+───────────────────────────────────────────────────────────── */
+.mobileToggle {
   display: none;
+  align-items: center;
+  justify-content: center;
   background: none;
   border: none;
   color: var(--text-secondary);
   cursor: pointer;
-  padding: 6px;
+  padding: 0 8px;
   border-radius: var(--radius-sm);
   transition: background 0.15s;
 }
 
-.mobileMenuBtn:hover {
+.mobileToggle:hover {
   background: rgba(255, 255, 255, 0.06);
   color: var(--text-primary);
 }
 
-/* ══════════════════════════════════════════
-   MOBILE DROPDOWN NAV
-══════════════════════════════════════════ */
+/* ─────────────────────────────────────────────────────────────
+   MOBILE NAV DROPDOWN
+───────────────────────────────────────────────────────────── */
 .mobileNav {
-  display: none;
+  display: flex;
   flex-direction: column;
   background: var(--bg-secondary);
   border-bottom: 1px solid var(--border-color);
-  padding: 8px 16px 16px;
-  gap: 4px;
-  animation: slideDown 0.2s ease;
+  padding: 8px 12px 14px;
+  gap: 2px;
+  animation: slideDown 0.18s ease;
 }
 
 @keyframes slideDown {
-  from { opacity: 0; transform: translateY(-8px); }
+  from { opacity: 0; transform: translateY(-6px); }
   to   { opacity: 1; transform: translateY(0); }
 }
 
-.mobileNavLink {
+.mobileNavItem {
   display: flex;
   align-items: center;
   gap: 12px;
@@ -263,16 +361,16 @@
   font-size: 0.9rem;
   font-weight: 500;
   text-decoration: none;
-  transition: all 0.15s;
+  transition: background 0.15s, color 0.15s;
 }
 
-.mobileNavLink:hover {
+.mobileNavItem:hover {
   background: rgba(108, 99, 255, 0.08);
   color: var(--text-primary);
 }
 
-.mobileNavLink.mobileActive {
-  background: rgba(108, 99, 255, 0.14);
+.mobileNavItemActive {
+  background: rgba(108, 99, 255, 0.13);
   color: var(--accent-primary);
   font-weight: 600;
 }
@@ -280,7 +378,7 @@
 .mobileDivider {
   height: 1px;
   background: var(--border-color);
-  margin: 8px 0;
+  margin: 6px 0;
 }
 
 .mobileLogout {
@@ -296,58 +394,46 @@
   font-size: 0.9rem;
   font-family: var(--font-body);
   font-weight: 500;
-  transition: background 0.15s;
-  width: 100%;
   text-align: left;
+  width: 100%;
+  transition: background 0.15s;
 }
 
 .mobileLogout:hover {
   background: rgba(244, 63, 94, 0.08);
 }
 
-/* ══════════════════════════════════════════
-   PAGE CONTENT AREA
-══════════════════════════════════════════ */
+/* ─────────────────────────────────────────────────────────────
+   PAGE CONTENT
+───────────────────────────────────────────────────────────── */
 .content {
   flex: 1;
   padding: 32px 40px;
   overflow-y: auto;
-  max-width: 1280px;
   width: 100%;
-  margin: 0 auto;  /* center content on wide screens */
+  max-width: 1280px;
+  margin: 0 auto;
 }
 
-/* ══════════════════════════════════════════
-   RESPONSIVE — MOBILE (≤768px)
-══════════════════════════════════════════ */
+/* ─────────────────────────────────────────────────────────────
+   RESPONSIVE — MOBILE (≤ 768px)
+───────────────────────────────────────────────────────────── */
 @media (max-width: 768px) {
-  /* Hide desktop nav links and user dropdown on mobile */
-  .navLinks    { display: none; }
-  .userMeta    { display: none; }
-  .userDropdown { display: none; }
-
-  /* Show hamburger */
-  .mobileMenuBtn { display: flex; }
-
-  /* Show mobile nav when open */
-  .mobileNav { display: flex; }
-
-  .navbar { padding: 0 16px; }
-  .content { padding: 20px 16px; }
+  .navLinks     { display: none; }   /* hide desktop nav */
+  .navRight     { border-left: none; padding-left: 0; margin-left: auto; }
+  .meWrap       { display: none; }   /* Me dropdown hidden on mobile (use hamburger) */
+  .mobileToggle { display: flex; }
+  .navbar       { padding: 0 14px; }
+  .content      { padding: 20px 16px; }
 }
 
-/* ══════════════════════════════════════════
+/* ─────────────────────────────────────────────────────────────
    RESPONSIVE — TABLET (769px – 1024px)
-══════════════════════════════════════════ */
+   Tighten nav item padding so everything fits
+───────────────────────────────────────────────────────────── */
 @media (min-width: 769px) and (max-width: 1024px) {
-  /* Hide label text on nav links, show only icons */
-  .navLink span {
-    display: none;
-  }
-  .navLink {
-    padding: 7px 10px;
-  }
-  .content {
-    padding: 24px 24px;
-  }
+  .navItem   { padding: 0 12px; min-width: 60px; }
+  .meBtn     { padding: 0 10px; }
+  .content   { padding: 24px 24px; }
+  .logoText  { display: none; }  /* hide "SSP" text, keep icon only on tight screens */
 }

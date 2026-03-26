@@ -1,23 +1,25 @@
 // src/components/layout/AppLayout.jsx
-// Top horizontal navigation bar for authenticated pages.
-//@author sshende
+// LinkedIn-style top navbar: logo left, icon+label nav center, Me avatar right.
+// @author sshende
 
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { Outlet, NavLink, useNavigate } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
 import {
-  LayoutDashboard, Briefcase, FileText, MessageSquare,
-  User, Users, LogOut, Menu, X, ChevronDown,
+  LayoutDashboard, Briefcase, FileText,
+  MessageSquare, User, Users, LogOut,
+  Menu, X, ChevronDown,
 } from 'lucide-react'
 import { roleColor, initials } from '../../utils/helpers'
 import styles from './AppLayout.module.css'
 
+// Nav items per role — Profile is intentionally removed from here
+// It lives under the "Me" dropdown (LinkedIn pattern)
 const NAV = {
   student: [
     { to: '/student/dashboard',    icon: LayoutDashboard, label: 'Dashboard' },
-    { to: '/student/projects',     icon: Briefcase,       label: 'Browse Projects' },
-    { to: '/student/applications', icon: FileText,        label: 'My Applications' },
-    { to: '/student/profile',      icon: User,            label: 'My Profile' },
+    { to: '/student/projects',     icon: Briefcase,       label: 'Projects' },
+    { to: '/student/applications', icon: FileText,        label: 'Applications' },
     { to: '/messages',             icon: MessageSquare,   label: 'Messages' },
   ],
   sponsor: [
@@ -32,100 +34,143 @@ const NAV = {
   ],
   admin: [
     { to: '/admin/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
-    { to: '/admin/users',     icon: Users,            label: 'Manage Users' },
+    { to: '/admin/users',     icon: Users,            label: 'Users' },
     { to: '/messages',        icon: MessageSquare,    label: 'Messages' },
   ],
 }
 
-export default function AppLayout() {
-  const { user, logout }         = useAuth()
-  const navigate                 = useNavigate()
-  const [mobileOpen, setMobile]  = useState(false)
-  const [dropdownOpen, setDropdown] = useState(false)
+// Profile route per role — opens via Me dropdown
+const PROFILE_ROUTE = {
+  student: '/student/profile',
+  sponsor: '/sponsor/profile',
+  faculty: '/faculty/profile',
+  admin:   null,
+}
 
-  const navItems = NAV[user?.role] || []
-  const rColor   = roleColor(user?.role)
+export default function AppLayout() {
+  const { user, logout }            = useAuth()
+  const navigate                    = useNavigate()
+  const [meOpen, setMeOpen]         = useState(false)
+  const [mobileOpen, setMobileOpen] = useState(false)
+  const meRef                       = useRef(null)
+
+  const navItems    = NAV[user?.role] || []
+  const rColor      = roleColor(user?.role)
+  const profilePath = PROFILE_ROUTE[user?.role]
+
+  // Close Me dropdown on outside click
+  useEffect(() => {
+    const handler = (e) => {
+      if (meRef.current && !meRef.current.contains(e.target)) {
+        setMeOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', handler)
+    return () => document.removeEventListener('mousedown', handler)
+  }, [])
 
   const handleLogout = async () => {
+    setMeOpen(false)
     await logout()
     navigate('/login')
+  }
+
+  const handleProfileNav = () => {
+    setMeOpen(false)
+    if (profilePath) navigate(profilePath)
   }
 
   return (
     <div className={styles.layout}>
 
-      {/* ── Top Navigation Bar ── */}
+      {/* ── Top Navbar ── */}
       <header className={styles.navbar}>
 
-        {/* Left: Logo */}
-        <div className={styles.navLogo}>
+        {/* Logo */}
+        <div className={styles.logo}>
           <span className={styles.logoIcon} style={{ background: rColor }}>S</span>
           <span className={styles.logoText}>SSP</span>
         </div>
 
-        {/* Center: Nav links (desktop) */}
-        <nav className={styles.navLinks}>
+        {/* Desktop nav: icon above label (LinkedIn style) */}
+        <nav className={styles.navLinks} aria-label="Main navigation">
           {navItems.map(({ to, icon: Icon, label }) => (
             <NavLink
               key={to}
               to={to}
               className={({ isActive }) =>
-                `${styles.navLink} ${isActive ? styles.active : ''}`
+                `${styles.navItem} ${isActive ? styles.navItemActive : ''}`
               }
             >
-              <Icon size={16} />
-              <span>{label}</span>
+              {({ isActive }) => (
+                <>
+                  <Icon size={20} className={styles.navIcon} strokeWidth={isActive ? 2.5 : 1.75} />
+                  <span className={styles.navLabel}>{label}</span>
+                </>
+              )}
             </NavLink>
           ))}
         </nav>
 
-        {/* Right: User dropdown + logout */}
+        {/* Right: Me dropdown + mobile toggle */}
         <div className={styles.navRight}>
-          {/* User avatar + dropdown */}
-          <div className={styles.userDropdown}>
+
+          {/* Me button */}
+          <div className={styles.meWrap} ref={meRef}>
             <button
-              className={styles.userBtn}
-              onClick={() => setDropdown((p) => !p)}
+              className={`${styles.meBtn} ${meOpen ? styles.meBtnOpen : ''}`}
+              onClick={() => setMeOpen((p) => !p)}
+              aria-expanded={meOpen}
             >
-              <div className={styles.userAvatar} style={{ background: rColor }}>
+              <div className={styles.meAvatar} style={{ background: rColor }}>
                 {initials(user?.first_name, user?.last_name)}
               </div>
-              <div className={styles.userMeta}>
-                <span className={styles.userName}>
-                  {user?.first_name} {user?.last_name}
-                </span>
-                <span className={`badge badge-${user?.role}`}>{user?.role}</span>
-              </div>
-              <ChevronDown size={14} className={`${styles.chevron} ${dropdownOpen ? styles.chevronOpen : ''}`} />
+              <span className={styles.meLabel}>Me</span>
+              <ChevronDown
+                size={13}
+                className={`${styles.meChevron} ${meOpen ? styles.meChevronOpen : ''}`}
+              />
             </button>
 
-            {/* Dropdown menu */}
-            {dropdownOpen && (
-              <>
-                <div className={styles.dropdownBackdrop} onClick={() => setDropdown(false)} />
-                <div className={styles.dropdownMenu}>
-                  <div className={styles.dropdownHeader}>
-                    <div style={{ fontWeight: 700, fontSize: '0.9rem' }}>
-                      {user?.first_name} {user?.last_name}
-                    </div>
-                    <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>
-                      {user?.email}
-                    </div>
+            {/* Me dropdown menu */}
+            {meOpen && (
+              <div className={styles.meDropdown}>
+                <div className={styles.meDropdownHeader}>
+                  <div className={styles.meDropdownAvatar} style={{ background: rColor }}>
+                    {initials(user?.first_name, user?.last_name)}
                   </div>
-                  <div className={styles.dropdownDivider} />
-                  <button className={styles.dropdownLogout} onClick={handleLogout}>
-                    <LogOut size={15} />
-                    Sign Out
-                  </button>
+                  <div className={styles.meDropdownInfo}>
+                    <span className={styles.meDropdownName}>
+                      {user?.first_name} {user?.last_name}
+                    </span>
+                    <span className={styles.meDropdownEmail}>{user?.email}</span>
+                    <span className={`badge badge-${user?.role}`}>{user?.role}</span>
+                  </div>
                 </div>
-              </>
+
+                <div className={styles.meDropdownDivider} />
+
+                {profilePath && (
+                  <button className={styles.meDropdownItem} onClick={handleProfileNav}>
+                    <User size={15} />
+                    View Profile
+                  </button>
+                )}
+
+                <div className={styles.meDropdownDivider} />
+
+                <button className={styles.meDropdownLogout} onClick={handleLogout}>
+                  <LogOut size={15} />
+                  Sign Out
+                </button>
+              </div>
             )}
           </div>
 
           {/* Mobile hamburger */}
           <button
-            className={styles.mobileMenuBtn}
-            onClick={() => setMobile((p) => !p)}
+            className={styles.mobileToggle}
+            onClick={() => setMobileOpen((p) => !p)}
             aria-label="Toggle menu"
           >
             {mobileOpen ? <X size={22} /> : <Menu size={22} />}
@@ -140,15 +185,27 @@ export default function AppLayout() {
             <NavLink
               key={to}
               to={to}
-              onClick={() => setMobile(false)}
+              onClick={() => setMobileOpen(false)}
               className={({ isActive }) =>
-                `${styles.mobileNavLink} ${isActive ? styles.mobileActive : ''}`
+                `${styles.mobileNavItem} ${isActive ? styles.mobileNavItemActive : ''}`
               }
             >
               <Icon size={18} />
               {label}
             </NavLink>
           ))}
+          {profilePath && (
+            <NavLink
+              to={profilePath}
+              onClick={() => setMobileOpen(false)}
+              className={({ isActive }) =>
+                `${styles.mobileNavItem} ${isActive ? styles.mobileNavItemActive : ''}`
+              }
+            >
+              <User size={18} />
+              My Profile
+            </NavLink>
+          )}
           <div className={styles.mobileDivider} />
           <button className={styles.mobileLogout} onClick={handleLogout}>
             <LogOut size={18} />

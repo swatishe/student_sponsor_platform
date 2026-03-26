@@ -13,7 +13,7 @@ class ProjectListSerializer(serializers.ModelSerializer):
 
     created_by        = UserSerializer(read_only=True)
     tags_list         = serializers.SerializerMethodField()
-    application_count = serializers.IntegerField(read_only=True, source='application_count')
+    application_count = serializers.IntegerField(read_only=True)
 
     class Meta:
         model  = Project
@@ -31,7 +31,7 @@ class ProjectSerializer(serializers.ModelSerializer):
 
     created_by        = UserSerializer(read_only=True)
     tags_list         = serializers.SerializerMethodField()
-    application_count = serializers.IntegerField(read_only=True, source='application_count')
+    application_count = serializers.IntegerField(read_only=True)
 
     class Meta:
         model  = Project
