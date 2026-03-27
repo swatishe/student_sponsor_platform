@@ -162,8 +162,31 @@ USE_TZ        = True
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-# ── Email (console backend for development) ───────────────────
-EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+# ── Email settings(console backend for development) ───────────────────
+
+# For DEVELOPMENT: prints emails to terminal (no real sending)
+EMAIL_BACKEND   = 'django.core.mail.backends.console.EmailBackend'
+DEFAULT_FROM_EMAIL = 'SSP Platform <noreply@ssp.com>'
+FRONTEND_URL    = 'http://localhost:5173'
+
+# ── For PRODUCTION with Gmail ─────────────────────────────────
+# Uncomment and fill in your Gmail credentials:
+#
+# EMAIL_BACKEND    = 'django.core.mail.backends.smtp.EmailBackend'
+# EMAIL_HOST       = 'smtp.gmail.com'
+# EMAIL_PORT       = 587
+# EMAIL_USE_TLS    = True
+# EMAIL_HOST_USER  = config('EMAIL_HOST_USER')    # your Gmail address
+# EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD')  # Gmail App Password
+# DEFAULT_FROM_EMAIL = f'SSP Platform <{EMAIL_HOST_USER}>'
+# FRONTEND_URL     = config('FRONTEND_URL', default='https://yourdomain.com')
+
+# ── For PRODUCTION with SendGrid ──────────────────────────────
+# pip install sendgrid-django
+# INSTALLED_APPS += ['sgbackend']
+# EMAIL_BACKEND    = 'sgbackend.SendGridBackend'
+# SENDGRID_API_KEY = config('SENDGRID_API_KEY')
+
 
 # ── Logging ───────────────────────────────────────────────────
 LOGGING = {

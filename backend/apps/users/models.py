@@ -1,17 +1,12 @@
 """
 apps/users/models.py
 ────────────────────
-Custom User model (email-based auth) + role-specific profile models.
-
-Roles:
-  student  → StudentProfile  (skills, resume, portfolio)
-  sponsor  → SponsorProfile  (company info, logo)
-  faculty  → FacultyProfile  (department, research interests)
-  admin    → no profile model — uses Django admin
-
-@author sshende
+Custom User model (email-based auth) + role-specific profile models
++ EmailVerificationToken for email verification on signup.
 """
 
+import uuid
+from datetime import timedelta
 from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin, BaseUserManager
 from django.db import models
 from django.utils import timezone
@@ -33,17 +28,13 @@ class UserManager(BaseUserManager):
         extra_fields.setdefault('is_staff',     True)
         extra_fields.setdefault('is_superuser', True)
         extra_fields.setdefault('role',         User.Role.ADMIN)
-        if extra_fields.get('is_staff') is not True:
-            raise ValueError('Superuser must have is_staff=True.')
-        if extra_fields.get('is_superuser') is not True:
-            raise ValueError('Superuser must have is_superuser=True.')
+        extra_fields.setdefault('is_verified',  True)  # superusers are pre-verified
         return self.create_user(email, password, **extra_fields)
 
 
 class User(AbstractBaseUser, PermissionsMixin):
     """
-    Platform User.
-    EMAIL is the unique identifier (no username field).
+    Platform User. EMAIL is the unique identifier.
     """
 
     class Role(models.TextChoices):
@@ -52,21 +43,14 @@ class User(AbstractBaseUser, PermissionsMixin):
         FACULTY = 'faculty', 'Faculty'
         ADMIN   = 'admin',   'Admin'
 
-    # ── Core fields ───────────────────────────────────────────
     email      = models.EmailField(unique=True, db_index=True)
     first_name = models.CharField(max_length=100)
     last_name  = models.CharField(max_length=100)
-    role       = models.CharField(
-        max_length=20,
-        choices=Role.choices,
-        default=Role.STUDENT,
-        db_index=True,
-    )
+    role       = models.CharField(max_length=20, choices=Role.choices, default=Role.STUDENT, db_index=True)
 
-    # ── Status ────────────────────────────────────────────────
     is_active   = models.BooleanField(default=True)
-    is_staff    = models.BooleanField(default=False)   # Django admin access
-    is_verified = models.BooleanField(default=False)   # Email verified
+    is_staff    = models.BooleanField(default=False)
+    is_verified = models.BooleanField(default=False)  # True after email verification
 
     date_joined = models.DateTimeField(default=timezone.now)
 
@@ -78,8 +62,6 @@ class User(AbstractBaseUser, PermissionsMixin):
     class Meta:
         db_table = 'users'
         ordering = ['-date_joined']
-        verbose_name = 'User'
-        verbose_name_plural = 'Users'
 
     def __str__(self):
         return f'{self.get_full_name()} <{self.email}> [{self.role}]'
@@ -90,7 +72,6 @@ class User(AbstractBaseUser, PermissionsMixin):
     def get_short_name(self):
         return self.first_name
 
-    # ── Role helpers ──────────────────────────────────────────
     @property
     def is_student(self):
         return self.role == self.Role.STUDENT
@@ -108,15 +89,32 @@ class User(AbstractBaseUser, PermissionsMixin):
         return self.role == self.Role.ADMIN
 
 
-class StudentProfile(models.Model):
-    """Extended profile for Student users."""
+class EmailVerificationToken(models.Model):
+    """
+    One-time token sent to users on registration to verify their email.
+    Expires after 24 hours.
+    """
+    user       = models.ForeignKey(User, on_delete=models.CASCADE, related_name='verification_tokens')
+    token      = models.UUIDField(default=uuid.uuid4, unique=True, editable=False)
+    created_at = models.DateTimeField(auto_now_add=True)
 
+    class Meta:
+        db_table = 'email_verification_tokens'
+
+    def __str__(self):
+        return f'VerificationToken for {self.user.email}'
+
+    def is_expired(self):
+        """Token is valid for 24 hours."""
+        return timezone.now() > self.created_at + timedelta(hours=24)
+
+
+class StudentProfile(models.Model):
     user          = models.OneToOneField(User, on_delete=models.CASCADE, related_name='student_profile')
     bio           = models.TextField(blank=True)
     university    = models.CharField(max_length=200, blank=True)
     major         = models.CharField(max_length=200, blank=True)
     gpa           = models.DecimalField(max_digits=3, decimal_places=2, null=True, blank=True)
-    # Comma-separated for simplicity (no M2M overhead for MVP)
     skills        = models.TextField(blank=True, help_text='Comma-separated: Python, React, ML')
     resume        = models.FileField(upload_to='resumes/', null=True, blank=True)
     portfolio_url = models.URLField(blank=True)
@@ -133,13 +131,10 @@ class StudentProfile(models.Model):
         return f'StudentProfile({self.user.get_full_name()})'
 
     def get_skills_list(self):
-        """Return skills as a clean Python list."""
         return [s.strip() for s in self.skills.split(',') if s.strip()]
 
 
 class SponsorProfile(models.Model):
-    """Extended profile for Sponsor users."""
-
     user         = models.OneToOneField(User, on_delete=models.CASCADE, related_name='sponsor_profile')
     company_name = models.CharField(max_length=200)
     industry     = models.CharField(max_length=200, blank=True)
@@ -157,13 +152,11 @@ class SponsorProfile(models.Model):
 
 
 class FacultyProfile(models.Model):
-    """Extended profile for Faculty users."""
-
     user               = models.OneToOneField(User, on_delete=models.CASCADE, related_name='faculty_profile')
     department         = models.CharField(max_length=200, blank=True)
     university         = models.CharField(max_length=200, blank=True)
     bio                = models.TextField(blank=True)
-    research_interests = models.TextField(blank=True, help_text='Comma-separated research areas')
+    research_interests = models.TextField(blank=True)
     created_at         = models.DateTimeField(auto_now_add=True)
     updated_at         = models.DateTimeField(auto_now=True)
 

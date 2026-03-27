@@ -1,6 +1,7 @@
 // src/api/services.js
-// All API service calls organised by domain.
+// All API service calls organised by domain with verifyEmail + resendVerification to authAPI
 //@author sshende
+
 import api from './axios'
 
 // ── Auth ────────────────────────────────────────────────────────────────
@@ -10,6 +11,9 @@ export const authAPI = {
   logout:         (refresh)          => api.post('/api/v1/auth/logout/', { refresh }),
   getMe:          ()                 => api.get('/api/v1/users/me/'),
   changePassword: (data)             => api.post('/api/v1/users/change-password/', data),
+  // Email verification
+  verifyEmail:          (token)  => api.get(`/api/v1/users/verify-email/?token=${token}`),
+  resendVerification:   ()       => api.post('/api/v1/users/resend-verification/'),
 }
 
 // ── Profiles ────────────────────────────────────────────────────────────
@@ -44,15 +48,15 @@ export const applicationAPI = {
 
 // ── Messaging ─────────────────────────────────────────────────────────────
 export const messagingAPI = {
-  getConversations:  ()                    => api.get('/api/v1/messages/conversations/'),
+  getConversations:  ()                     => api.get('/api/v1/messages/conversations/'),
   startConversation: (recipientId, message) => api.post('/api/v1/messages/start/', { recipient_id: recipientId, message }),
-  getMessages:       (convId)              => api.get(`/api/v1/messages/conversations/${convId}/messages/`),
-  sendMessage:       (convId, content)     => api.post(`/api/v1/messages/conversations/${convId}/send/`, { content }),
+  getMessages:       (convId)               => api.get(`/api/v1/messages/conversations/${convId}/messages/`),
+  sendMessage:       (convId, content)      => api.post(`/api/v1/messages/conversations/${convId}/send/`, { content }),
 }
 
 // ── Admin ─────────────────────────────────────────────────────────────────
 export const adminAPI = {
-  getUsers:   (role)       => api.get('/api/v1/users/admin/users/', { params: role ? { role } : {} }),
-  updateUser: (id, data)   => api.patch(`/api/v1/users/admin/users/${id}/`, data),
-  deleteUser: (id)         => api.delete(`/api/v1/users/admin/users/${id}/`),
+  getUsers:   (role)     => api.get('/api/v1/users/admin/users/', { params: role ? { role } : {} }),
+  updateUser: (id, data) => api.patch(`/api/v1/users/admin/users/${id}/`, data),
+  deleteUser: (id)       => api.delete(`/api/v1/users/admin/users/${id}/`),
 }

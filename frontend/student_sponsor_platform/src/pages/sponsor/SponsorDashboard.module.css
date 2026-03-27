@@ -1,0 +1,126 @@
+/* src/pages/sponsor/SponsorDashboard.module.css */
+
+/* Page header: title left, button right */
+.pageHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 28px;
+  gap: 16px;
+}
+.pageHeader h1 { font-size: 1.8rem; margin-bottom: 4px; }
+.pageHeader p  { color: var(--text-secondary); font-size: 0.9rem; }
+
+/* Stats: 4 equal-width cards in a row */
+.statsGrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin-bottom: 28px;
+}
+
+/* Stat card */
+.statCard {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.statIcon  { flex-shrink: 0; }
+.statValue {
+  font-size: 2rem;
+  font-family: var(--font-display);
+  font-weight: 800;
+  color: var(--text-primary);
+  line-height: 1;
+}
+.statLabel {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+/* Card header row */
+.cardHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+.cardHeader h3 { font-size: 1rem; }
+
+/* Project table */
+.projectList { display: flex; flex-direction: column; gap: 0; }
+
+.tableHeader {
+  display: grid;
+  grid-template-columns: 1fr 110px 100px 90px 110px;
+  padding: 8px 14px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.tableRow {
+  display: grid;
+  grid-template-columns: 1fr 110px 100px 90px 110px;
+  align-items: center;
+  padding: 12px 14px;
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+  transition: background 0.15s;
+}
+.tableRow:last-child { border-bottom: none; }
+.tableRow:hover      { background: rgba(255,255,255,0.02); }
+
+.projectTitle {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  min-width: 0;
+}
+.paidBadge {
+  font-size: 0.72rem;
+  color: var(--accent-success);
+  font-weight: 400;
+}
+
+.projectType {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  text-transform: capitalize;
+}
+
+.appCount {
+  font-size: 0.82rem;
+  color: var(--text-secondary);
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+/* Responsive */
+@media (max-width: 900px) {
+  .statsGrid { grid-template-columns: repeat(2, 1fr); }
+  .tableHeader,
+  .tableRow   { grid-template-columns: 1fr 80px 80px; }
+  .tableHeader span:nth-child(2),
+  .tableRow    > span:nth-child(2),
+  .tableHeader span:nth-child(5),
+  .tableRow    > a  { display: none; }
+}
+
+@media (max-width: 580px) {
+  .statsGrid  { grid-template-columns: 1fr 1fr; }
+  .pageHeader { flex-direction: column; }
+  .pageHeader .btn { width: 100%; justify-content: center; }
+}

@@ -11,6 +11,8 @@ import AppLayout from './components/layout/AppLayout'
 // Auth
 import LoginPage    from './pages/auth/LoginPage'
 import RegisterPage from './pages/auth/RegisterPage'
+import VerifyEmailPage from './pages/auth/VerifyEmailPage'
+
 
 // Student
 import StudentDashboard  from './pages/student/StudentDashboard'
@@ -24,6 +26,8 @@ import SponsorDashboard   from './pages/sponsor/SponsorDashboard'
 import ManageProjects     from './pages/sponsor/ManageProjects'
 import ProjectForm        from './pages/sponsor/ProjectForm'
 import ApplicationsReview from './pages/sponsor/ApplicationsReview'
+import SponsorProfile from './pages/sponsor/SponsorProfile'
+
 
 // Faculty
 import FacultyDashboard from './pages/faculty/FacultyDashboard'
@@ -61,6 +65,8 @@ function AppRoutes() {
       <Route path="/login"    element={<LoginPage />} />
       <Route path="/register" element={<RegisterPage />} />
       <Route path="/"         element={<HomeRedirect />} />
+      <Route path="/verify-email" element={<VerifyEmailPage />} />
+
 
       {/* Authenticated shell */}
       <Route element={<PrivateRoute><AppLayout /></PrivateRoute>}>
@@ -78,6 +84,7 @@ function AppRoutes() {
         <Route path="/sponsor/projects/new"                element={<PrivateRoute roles={['sponsor']}><ProjectForm /></PrivateRoute>} />
         <Route path="/sponsor/projects/:id/edit"           element={<PrivateRoute roles={['sponsor']}><ProjectForm /></PrivateRoute>} />
         <Route path="/sponsor/projects/:id/applicants"     element={<PrivateRoute roles={['sponsor']}><ApplicationsReview /></PrivateRoute>} />
+        <Route path="/sponsor/profile"                     element={<PrivateRoute roles={['sponsor']}><SponsorProfile /></PrivateRoute>}/>
 
         {/* Faculty */}
         <Route path="/faculty/dashboard"               element={<PrivateRoute roles={['faculty']}><FacultyDashboard /></PrivateRoute>} />
