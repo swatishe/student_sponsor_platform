@@ -23,7 +23,6 @@ INSTALLED_APPS = [
     'corsheaders',
     'channels',
     'django_filters',
-    'apps.users',
     'apps.projects',
     'apps.applications',
     'apps.messaging',
