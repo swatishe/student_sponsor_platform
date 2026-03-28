@@ -13,7 +13,9 @@ import { format, formatDistanceToNow } from 'date-fns'
 import styles from './Messaging.module.css'
 
 // WebSocket base — empty string means same host (works with Vite proxy)
-const WS_BASE = import.meta.env.VITE_WS_URL || ''
+const WS_BASE = import.meta.env.VITE_WS_URL
+  || import.meta.env.VITE_API_URL?.replace('https://', 'wss://').replace('http://', 'ws://')
+  || ''
 
 export default function MessagingPage() {
   const { convId }  = useParams()

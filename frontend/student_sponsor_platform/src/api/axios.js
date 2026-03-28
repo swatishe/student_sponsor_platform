@@ -1,9 +1,9 @@
-// src/api/axios.js
-// Axios instance with base URL, JWT attach, and auto-refresh on 401.
-//@author sshende
 import axios from 'axios'
 
-// When using Vite proxy (vite.config.js), VITE_API_URL can be empty.
+// In production: VITE_API_URL = https://ssp-backend.onrender.com
+// In development: empty = use Vite proxy
+// Axios instance with base URL, JWT attach, and auto-refresh on 401.
+// @author sshende
 const BASE_URL = import.meta.env.VITE_API_URL || ''
 
 const api = axios.create({
@@ -11,17 +11,12 @@ const api = axios.create({
   headers: { 'Content-Type': 'application/json' },
 })
 
-// ── Attach JWT to every request ──────────────────────────────────────────
-api.interceptors.request.use(
-  (config) => {
-    const token = localStorage.getItem('access_token')
-    if (token) config.headers.Authorization = `Bearer ${token}`
-    return config
-  },
-  (error) => Promise.reject(error),
-)
+api.interceptors.request.use((config) => {
+  const token = localStorage.getItem('access_token')
+  if (token) config.headers.Authorization = `Bearer ${token}`
+  return config
+}, (error) => Promise.reject(error))
 
-// ── Auto-refresh on 401 ──────────────────────────────────────────────────
 api.interceptors.response.use(
   (response) => response,
   async (error) => {
@@ -45,7 +40,7 @@ api.interceptors.response.use(
       }
     }
     return Promise.reject(error)
-  },
+  }
 )
 
 export default api

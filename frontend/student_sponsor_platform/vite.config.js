@@ -1,4 +1,3 @@
-// vite.config.js
 // Proxies /api and /ws to Django during development.
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
@@ -11,10 +10,14 @@ export default defineConfig({
   },
   server: {
     port: 5173,
+    // Proxy only used in local dev — not in production
     proxy: {
-      '/api': { target: 'http://localhost:8000', changeOrigin: true, secure: false },
-      '/ws':  { target: 'ws://localhost:8000',  ws: true, changeOrigin: true },
+      '/api': { target: 'http://localhost:8000', changeOrigin: true },
+      '/ws':  { target: 'ws://localhost:8000',  ws: true },
     },
   },
-  build: { outDir: 'dist', sourcemap: true },
+  build: {
+    outDir: 'dist',
+    sourcemap: false,
+  },
 })
