@@ -28,6 +28,7 @@ INSTALLED_APPS = [
     'apps.applications',
     'apps.messaging',
     'apps.core',
+    'apps.users.apps.UsersConfig',
 ]
 
 MIDDLEWARE = [
