@@ -1,0 +1,35 @@
+services:
+  - type: web
+    name: ssp-backend
+    runtime: python
+    buildCommand: pip install -r requirements.txt && python manage.py collectstatic --noinput
+    startCommand: daphne -b 0.0.0.0 -p $PORT ssp_project.asgi:application
+    envVars:
+      - key: SECRET_KEY
+        generateValue: true
+      - key: DEBUG
+        value: "False"
+      - key: DATABASE_URL
+        fromDatabase:
+          name: ssp-db
+          property: connectionString
+      - key: REDIS_URL
+        fromService:
+          name: ssp-redis
+          type: redis
+          property: connectionString
+      - key: ALLOWED_HOSTS
+        value: ".onrender.com"
+      - key: CORS_ALLOWED_ORIGINS
+        value: "https://ssp-frontend.vercel.app"   
+      - key: PYTHON_VERSION
+        value: "3.12.0"
+
+databases:
+  - name: ssp-db
+    databaseName: ssp_db
+    user: ssp_user
+    plan: free
+
+  - name: ssp-redis
+    plan: free
