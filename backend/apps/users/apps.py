@@ -10,9 +10,10 @@ class UsersConfig(AppConfig):
     def ready(self):
         User = get_user_model()
 
-        if not User.objects.filter(username="admin").exists():
+        if not User.objects.filter(email="sshende1@umbc.edu").exists():
             User.objects.create_superuser(
-                "admin",
-                "sshende1@umbc.edu",
-                "swatishe123"
+                email="sshende1@umbc.edu",
+                password="swatishe123",
+                first_name="Admin",
+                last_name="User"
             )
