@@ -1,0 +1,1 @@
+# SSP Django apps package
