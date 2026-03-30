@@ -3,6 +3,7 @@ apps/messaging/views.py
 ────────────────────────
 REST views for conversations and messages.
 Real-time delivery is handled by WebSocket consumers (consumers.py).
+@author: sshende
 """
 
 from rest_framework import generics, permissions, status
@@ -14,7 +15,7 @@ from .serializers import ConversationSerializer, MessageSerializer, StartConvers
 
 User = get_user_model()
 
-
+"""ConversationListView returns all conversations the current user participates in, ordered by most recently updated. StartConversationView allows a user to start a new conversation (or retrieve an existing one) with a specified recipient and send the first message. MessageListView returns the message history for a given conversation and marks received messages as read. SendMessageView provides a REST endpoint for sending a message to a conversation when WebSocket is unavailable."""
 class ConversationListView(generics.ListAPIView):
     """
     GET /api/v1/messages/conversations/
@@ -36,7 +37,7 @@ class ConversationListView(generics.ListAPIView):
         ctx['request'] = self.request
         return ctx
 
-
+""" StartConversationView allows a user to start a new conversation (or retrieve an existing one) with a specified recipient and send the first message. MessageListView returns the message history for a given conversation and marks received messages as read. SendMessageView provides a REST endpoint for sending a message to a conversation when WebSocket is unavailable. """
 class StartConversationView(APIView):
     """
     POST /api/v1/messages/start/
@@ -75,7 +76,7 @@ class StartConversationView(APIView):
             status=status.HTTP_201_CREATED if created else status.HTTP_200_OK,
         )
 
-
+"""MessageListView returns the message history for a given conversation and marks received messages as read. SendMessageView provides a REST endpoint for sending a message to a conversation when WebSocket is unavailable."""
 class MessageListView(generics.ListAPIView):
     """
     GET /api/v1/messages/conversations/<conv_id>/messages/
@@ -99,7 +100,7 @@ class MessageListView(generics.ListAPIView):
 
         return Message.objects.filter(conversation=conversation).select_related('sender')
 
-
+"""SendMessageView provides a REST endpoint for sending a message to a conversation when WebSocket is unavailable."""
 class SendMessageView(generics.CreateAPIView):
     """
     POST /api/v1/messages/conversations/<conv_id>/send/

@@ -1,3 +1,7 @@
+"""ssp_project/settings.py — Django settings
+    ──────────────────────────────
+Django settings for the Student-Sponsor Platform project. This file configures the database, installed apps, middleware, REST framework, JWT authentication, CORS, static files, and email backend. It uses environment variables for sensitive information and settings that may differ between development and production environments, such as the secret key, debug mode, allowed hosts, database URL, and email settings. The configuration is designed to work seamlessly both locally and when deployed on platforms like Render, with support for Django Channels and Redis for real-time features.
+"""
 import os
 import dj_database_url
 from pathlib import Path

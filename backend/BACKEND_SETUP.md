@@ -3,10 +3,9 @@
 ## Project Structure
 
 ```
-ssp-backend/
+backend/
 ├── manage.py                          ← Django CLI entry point
 ├── requirements.txt                   ← All Python dependencies
-├── Procfile                           ← Heroku deployment command
 ├── runtime.txt                        ← Python version for Heroku
 ├── .env.example                       ← Environment variable template
 ├── .env                               ← Your local config (copy from .env.example)
@@ -53,7 +52,7 @@ ssp-backend/
 
 ---
 
-## Prerequisites — Install These First
+## Prerequisites - Install These First
 
 | Tool | Min Version | How to Install |
 |------|-------------|---------------|
@@ -65,16 +64,18 @@ ssp-backend/
 
 ---
 
-## STEP 1 — Get the Project Files
+## STEP 1 - Get the Project Files
 
 ```bash
 # Option A: unzip the downloaded file
-unzip ssp-backend.zip
-cd ssp-backend
+unzip student_sponsor_platform.zip
+cd student_sponsor_platform
+cd backend
 
 # Option B: if using git
-git clone <your-repo-url> ssp-backend
-cd ssp-backend
+git clone <your-repo-url> student_sponsor_platform
+cd student_sponsor_platform
+cd backend
 ```
 
 Confirm the structure:
@@ -85,7 +86,7 @@ ls -la
 
 ---
 
-## STEP 2 — Create a Python Virtual Environment
+## STEP 2 - Create a Python Virtual Environment
 
 ```bash
 # Create the venv (do this once)
@@ -107,7 +108,7 @@ Your prompt should now show `(venv)` at the start.
 
 ---
 
-## STEP 3 — Install Python Dependencies
+## STEP 3 - Install Python Dependencies
 
 ```bash
 pip install -r requirements.txt
@@ -127,12 +128,12 @@ Expected: `Successfully installed X packages`
 
 ---
 
-## STEP 4 — Set Up PostgreSQL
+## STEP 4 - Set Up PostgreSQL
 
 ### macOS (Homebrew)
 ```bash
-brew install postgresql@15
-brew services start postgresql@15
+brew install postgresql@14
+brew services start postgresql@14
 psql postgres
 ```
 
@@ -155,7 +156,7 @@ sudo -u postgres psql
 CREATE DATABASE ssp_db;
 
 -- Create a dedicated user with a strong password
-CREATE USER ssp_user WITH PASSWORD 'YourStrongPassword123';
+CREATE USER ssp_user WITH PASSWORD 'password';
 
 -- Grant all privileges
 GRANT ALL PRIVILEGES ON DATABASE ssp_db TO ssp_user;
@@ -187,16 +188,7 @@ brew services start redis
 redis-cli ping   # Should return: PONG
 ```
 
-### Ubuntu / Debian
-```bash
-sudo apt install redis-server
-sudo systemctl start redis-server
-sudo systemctl enable redis-server
-redis-cli ping   # Should return: PONG
-```
-
 ### Windows
-Option 1 — WSL2 (recommended):
 ```bash
 # Inside WSL2 Ubuntu terminal:
 sudo apt install redis-server
@@ -204,13 +196,9 @@ sudo service redis-server start
 redis-cli ping
 ```
 
-Option 2 — Native Windows:
-Download from https://github.com/tporadowski/redis/releases
-Run `redis-server.exe`
-
 ---
 
-## STEP 6 — Configure Environment Variables
+## STEP 6 - Configure Environment Variables
 
 ```bash
 # Copy the template
@@ -232,7 +220,7 @@ ALLOWED_HOSTS=localhost,127.0.0.1
 # Match what you created in Step 4
 DB_NAME=ssp_db
 DB_USER=ssp_user
-DB_PASSWORD=YourStrongPassword123
+DB_PASSWORD=password
 DB_HOST=localhost
 DB_PORT=5432
 
@@ -250,7 +238,7 @@ python -c "from django.core.management.utils import get_random_secret_key; print
 
 ---
 
-## STEP 7 — Run Database Migrations
+## STEP 7 - Run Database Migrations
 
 This creates all the database tables.
 
@@ -282,7 +270,7 @@ psql -U ssp_user -d ssp_db -c "\dt"
 
 ---
 
-## STEP 8 — Create a Superuser (Admin Account)
+## STEP 8 - Create a Superuser (Admin Account)
 
 ```bash
 python manage.py createsuperuser
@@ -452,7 +440,7 @@ Errors: Code 4001 = Unauthorized, Code 4003 = Not a participant
 
 ---
 
-## STEP 13 — End-to-End Test Flow
+## STEP 13 - End-to-End Test Flow
 
 ### Test 1 — Register all roles
 ```bash
@@ -524,7 +512,7 @@ curl -X POST http://localhost:8000/api/v1/messages/start/ \
 
 ---
 
-## STEP 14 — Troubleshooting
+## STEP 14 - Troubleshooting
 
 ### "could not connect to server: Connection refused" (PostgreSQL)
 ```bash
@@ -599,52 +587,7 @@ CORS_ALLOWED_ORIGINS=https://yourdomain.com
 DB_HOST=<rds-endpoint-or-db-host>
 REDIS_URL=redis://<elasticache-or-redis-host>:6379
 ```
-
-### Deploy to Heroku
-```bash
-# Install Heroku CLI, then:
-heroku login
-heroku create your-ssp-api
-
-# Add PostgreSQL
-heroku addons:create heroku-postgresql:mini
-
-# Add Redis
-heroku addons:create heroku-redis:mini
-
-# Set environment variables
-heroku config:set SECRET_KEY=$(python -c "from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())")
-heroku config:set DEBUG=False
-heroku config:set ALLOWED_HOSTS=your-ssp-api.herokuapp.com
-heroku config:set CORS_ALLOWED_ORIGINS=https://your-frontend.netlify.app
-
-# Deploy
-git push heroku main
-
-# Run migrations on Heroku
-heroku run python manage.py migrate
-heroku run python manage.py createsuperuser
-```
-
-The `Procfile` already contains:
-```
-web: daphne -b 0.0.0.0 -p $PORT ssp_project.asgi:application
-```
-
-### Deploy to AWS Elastic Beanstalk
-1. Create EB environment with Python 3.11 platform
-2. Add RDS PostgreSQL instance
-3. Add ElastiCache Redis instance
-4. Set environment variables in EB console
-5. Create `.ebextensions/django.config`:
-```yaml
-option_settings:
-  aws:elasticbeanstalk:container:python:
-    WSGIPath: ssp_project.wsgi:application
-  aws:elasticbeanstalk:application:environment:
-    DJANGO_SETTINGS_MODULE: ssp_project.settings
-```
-
+###Deploy to public cloud
 ---
 
 ## Database Schema Summary

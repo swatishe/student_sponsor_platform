@@ -3,6 +3,7 @@ apps/applications/models.py
 ────────────────────────────
 Application model. Links a Student to a Project.
 unique_together prevents duplicate applications.
+@author: sshende
 """
 
 from django.db import models

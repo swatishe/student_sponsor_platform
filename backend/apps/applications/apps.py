@@ -1,3 +1,4 @@
+# @author: sshende
 from django.apps import AppConfig
 
 class ApplicationsConfig(AppConfig):

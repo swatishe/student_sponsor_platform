@@ -7,6 +7,7 @@ Each conversation gets its own channel group: chat_<conversation_id>
 Connection URL: ws://host/ws/chat/<conv_id>/?token=<JWT>
 Send payload:   { "message": "Hello!" }
 Receive payload:{ "type": "message", "content": "Hello!", "sender_id": 1, ... }
+@author: sshende
 """
 
 import json
@@ -21,7 +22,7 @@ from .models import Conversation, Message
 logger = get_user_model()
 User   = get_user_model()
 
-
+"""ChatConsumer handles WebSocket connections for real-time messaging. It authenticates users via JWT, verifies conversation participation, and manages message broadcasting to all participants in the conversation."""
 class ChatConsumer(AsyncWebsocketConsumer):
 
     async def connect(self):

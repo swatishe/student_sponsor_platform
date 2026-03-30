@@ -3,6 +3,7 @@ apps/users/views.py
 ────────────────────
 Views for registration (with email verification), current user,
 profile CRUD, and admin user management.
+@author sshende
 """
 
 import uuid

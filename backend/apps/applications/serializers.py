@@ -1,4 +1,7 @@
 """apps/applications/serializers.py"""
+"""Application serializers for handling API requests and responses.
+@author: sshende
+"""
 
 from rest_framework import serializers
 from .models import Application

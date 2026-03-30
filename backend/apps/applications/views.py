@@ -2,6 +2,7 @@
 apps/applications/views.py
 ───────────────────────────
 Students apply; sponsors/faculty review and update statuses.
+@author: sshende
 """
 
 from rest_framework import generics, permissions, status
@@ -10,7 +11,7 @@ from rest_framework.exceptions import PermissionDenied
 from .models import Application
 from .serializers import ApplicationSerializer, ApplicationStatusSerializer
 
-
+"""Views for handling application-related API endpoints. Students can apply to projects, view their applications, and withdraw applications. Sponsors and faculty can view applications for their projects and update application statuses.""" 
 class ApplyToProjectView(generics.CreateAPIView):
     """
     POST /api/v1/applications/
@@ -34,7 +35,7 @@ class ApplyToProjectView(generics.CreateAPIView):
             )
         return super().create(request, *args, **kwargs)
 
-
+"""List views for applications. MyApplicationsView shows all applications for the authenticated student. ProjectApplicationsView allows sponsors/faculty to see applicants for their projects (or all if admin). UpdateApplicationStatusView allows sponsors/faculty to update application status and add notes. WithdrawApplicationView allows students to withdraw their applications (soft delete)."""
 class MyApplicationsView(generics.ListAPIView):
     """
     GET /api/v1/applications/mine/
@@ -48,7 +49,7 @@ class MyApplicationsView(generics.ListAPIView):
             student=self.request.user
         ).select_related('project', 'student', 'project__created_by')
 
-
+"""Sponsor/Faculty/Admin view of applications for a project. Sponsors/Faculty only see their own projects; Admins see all."""
 class ProjectApplicationsView(generics.ListAPIView):
     """
     GET /api/v1/applications/project/<project_pk>/
@@ -73,7 +74,7 @@ class ProjectApplicationsView(generics.ListAPIView):
             project__created_by=user,
         ).select_related('student', 'project')
 
-
+"""Sponsor/Faculty/Admin can update application status and add notes. Students cannot access this endpoint."""
 class UpdateApplicationStatusView(generics.UpdateAPIView):
     """
     PATCH /api/v1/applications/<pk>/status/
@@ -94,7 +95,7 @@ class UpdateApplicationStatusView(generics.UpdateAPIView):
             raise PermissionDenied('Students cannot update application statuses.')
         return super().patch(request, *args, **kwargs)
 
-
+"""View for students to withdraw their applications."""
 class WithdrawApplicationView(generics.DestroyAPIView):
     """
     DELETE /api/v1/applications/<pk>/withdraw/

@@ -1,4 +1,8 @@
-"""apps/messaging/urls.py — REST URL patterns"""
+"""apps/messaging/urls.py — REST URL patterns
+    ──────────────────────────────
+    URL patterns for the Messaging app. Defines endpoints for listing conversations, starting new conversations, listing        messages in a conversation, and sending messages. Each endpoint is associated with a specific view that handles the corresponding functionality, allowing users to interact with their conversations and messages through the API.  
+    @author: sshende
+    """
 from django.urls import path
 from .views import (
     ConversationListView, StartConversationView,

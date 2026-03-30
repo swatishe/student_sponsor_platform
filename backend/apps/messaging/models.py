@@ -3,12 +3,13 @@ apps/messaging/models.py
 ─────────────────────────
 Conversation + Message models for direct messaging between users.
 Uses a Conversation container so one M2M set holds participants.
+@author: sshende
 """
 
 from django.db import models
 from django.conf import settings
 
-
+"""Conversation model represents a chat thread between exactly two participants. The get_or_create_between() class method ensures that only one conversation exists between any two users, preventing duplicates. The Message model represents individual messages within a Conversation, linking to the sender and containing the message content and read status."""
 class Conversation(models.Model):
     """
     A thread between exactly two participants.
@@ -42,7 +43,7 @@ class Conversation(models.Model):
         conv.participants.add(user1, user2)
         return conv, True
 
-
+"""Message model represents a single message within a Conversation, linking to the sender and containing the message content and read status."""
 class Message(models.Model):
     """A single message within a Conversation."""
 

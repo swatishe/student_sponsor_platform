@@ -1,4 +1,6 @@
 """apps/projects/serializers.py
+    ──────────────────────────────
+    Serializers for the Projects app. Defines how Project instances are converted to/from JSON for API responses and requests. Includes a lightweight ProjectListSerializer for listing projects with less data, and a full ProjectSerializer for detailed views and creation/updating. Both serializers include nested user information for the creator and a method to return the list of tags. The ProjectSerializer also includes validation to ensure that the deadline is a future date when creating or updating a project.
 @author sshende
 """
 

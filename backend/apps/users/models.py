@@ -3,6 +3,7 @@ apps/users/models.py
 ────────────────────
 Custom User model (email-based auth) + role-specific profile models
 + EmailVerificationToken for email verification on signup.
+@author: sshende
 """
 
 import uuid
