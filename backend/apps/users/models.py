@@ -109,6 +109,25 @@ class EmailVerificationToken(models.Model):
         """Token is valid for 24 hours."""
         return timezone.now() > self.created_at + timedelta(hours=24)
 
+class PasswordResetToken(models.Model):
+    """
+    One-time token emailed to users who request a password reset.
+    Expires after 1 hour. Deleted on use.
+    """
+    user       = models.ForeignKey(User, on_delete=models.CASCADE, related_name='password_reset_tokens')
+    token      = models.UUIDField(default=uuid.uuid4, unique=True, editable=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = 'password_reset_tokens'
+
+    def __str__(self):
+        return f'PasswordResetToken for {self.user.email}'
+
+    def is_expired(self):
+        """Token is valid for 1 hour."""
+        return timezone.now() > self.created_at + timedelta(hours=1)    
+    
 
 class StudentProfile(models.Model):
     user          = models.OneToOneField(User, on_delete=models.CASCADE, related_name='student_profile')
