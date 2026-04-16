@@ -6,15 +6,19 @@ profile CRUD, and admin user management.
 @author sshende
 """
 
-import uuid
 from django.core.mail import send_mail
-from django.conf import settings
-from django.utils import timezone
+from django.conf import settings as django_settings
+from django.contrib.auth.password_validation import validate_password
+from django.core.exceptions import ValidationError
 from rest_framework import generics, permissions, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from django.contrib.auth import get_user_model
-from .models import StudentProfile, SponsorProfile, FacultyProfile, EmailVerificationToken
+
+from .models import (
+    StudentProfile, SponsorProfile, FacultyProfile,
+    EmailVerificationToken, PasswordResetToken,
+)
 from .serializers import (
     RegisterSerializer, UserSerializer,
     StudentProfileSerializer, SponsorProfileSerializer,
@@ -25,12 +29,38 @@ from .permissions import IsAdminUser
 User = get_user_model()
 
 
-# ── Auth / Account ────────────────────────────────────────────────────────────
+# ── Helpers ───────────────────────────────────────────────────────────────────
+
+def _send(subject, body, to_email):
+    """
+    Send email.
+    In DEBUG mode: fail loudly so you can see errors in the terminal.
+    In production: fail silently so a bad SMTP config doesn't break registration.
+    """
+    try:
+        send_mail(
+            subject        = subject,
+            message        = body,
+            from_email     = getattr(django_settings, 'DEFAULT_FROM_EMAIL', 'noreply@ssp.com'),
+            recipient_list = [to_email],
+            fail_silently  = not django_settings.DEBUG,   # ← loud in dev, silent in prod
+        )
+    except Exception as e:
+        # Always log — visible in daphne terminal
+        import logging
+        logging.getLogger(__name__).warning('Email send failed: %s', e)
+
+
+def _frontend():
+    return getattr(django_settings, 'FRONTEND_URL', 'http://localhost:5173')
+
+
+# ── Registration ──────────────────────────────────────────────────────────────
 
 class RegisterView(generics.CreateAPIView):
     """
     POST /api/v1/users/register/
-    Public. Creates user + role profile, then sends a verification email.
+    Public. Creates user + profile + sends verification email.
     """
     queryset           = User.objects.all()
     serializer_class   = RegisterSerializer
@@ -41,29 +71,23 @@ class RegisterView(generics.CreateAPIView):
         serializer.is_valid(raise_exception=True)
         user = serializer.save()
 
-        # ── Send verification email ──────────────────────────────────────
-        try:
-            token = EmailVerificationToken.objects.create(user=user)
-            frontend_url = getattr(settings, 'FRONTEND_URL', 'http://localhost:5173')
-            verify_url   = f"{frontend_url}/verify-email?token={token.token}"
+        # Create and send verification token
+        token      = EmailVerificationToken.objects.create(user=user)
+        verify_url = f"{_frontend()}/verify-email?token={token.token}"
 
-            send_mail(
-                subject='Verify your SSP account',
-                message=(
-                    f"Hi {user.first_name},\n\n"
-                    f"Thanks for signing up to the Student Sponsor Platform!\n\n"
-                    f"Please verify your email address by clicking the link below:\n\n"
-                    f"{verify_url}\n\n"
-                    f"This link expires in 24 hours.\n\n"
-                    f"If you didn't create this account, please ignore this email.\n\n"
-                    f"— SSP Team"
-                ),
-                from_email=settings.DEFAULT_FROM_EMAIL,
-                recipient_list=[user.email],
-                fail_silently=True,   # don't crash registration if email fails
-            )
-        except Exception:
-            pass  # registration still succeeds even if email fails
+        _send(
+            subject   = 'Verify your SSP account',
+            body      = (
+                f"Hi {user.first_name},\n\n"
+                f"Welcome to the Student Sponsor Platform!\n\n"
+                f"Verify your email address by clicking the link below:\n\n"
+                f"{verify_url}\n\n"
+                f"This link expires in 24 hours.\n\n"
+                f"If you didn't create this account, you can safely ignore this email.\n\n"
+                f"— SSP Team"
+            ),
+            to_email  = user.email,
+        )
 
         return Response(
             {
@@ -74,32 +98,41 @@ class RegisterView(generics.CreateAPIView):
         )
 
 
+# ── Email Verification ────────────────────────────────────────────────────────
+
 class VerifyEmailView(APIView):
     """
     GET /api/v1/users/verify-email/?token=<uuid>
-    Public. Marks user as verified when they click the email link.
+    Public. Called when user clicks the email link.
     """
     permission_classes = [permissions.AllowAny]
 
     def get(self, request):
-        token_str = request.query_params.get('token')
+        token_str = request.query_params.get('token', '').strip()
         if not token_str:
-            return Response({'detail': 'Token is required.'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {'detail': 'Token is required.'},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
 
         try:
             token = EmailVerificationToken.objects.select_related('user').get(token=token_str)
         except EmailVerificationToken.DoesNotExist:
-            return Response({'detail': 'Invalid or expired token.'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {'detail': 'Invalid or expired verification link.'},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
 
-        # Check expiry (24 hours)
         if token.is_expired():
             token.delete()
-            return Response({'detail': 'This link has expired. Please register again.'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {'detail': 'This verification link has expired. Please request a new one.'},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
 
-        # Mark user as verified
         token.user.is_verified = True
         token.user.save(update_fields=['is_verified'])
-        token.delete()  # one-time use
+        token.delete()
 
         return Response({'message': 'Email verified successfully! You can now log in.'})
 
@@ -107,44 +140,146 @@ class VerifyEmailView(APIView):
 class ResendVerificationView(APIView):
     """
     POST /api/v1/users/resend-verification/
-    Authenticated. Resends the verification email if not yet verified.
+    PUBLIC — user is NOT authenticated after registration (email not yet verified).
+    Body: { email }
+    Always returns 200 to prevent enumeration.
     """
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [permissions.AllowAny]   # ← MUST be AllowAny
 
     def post(self, request):
-        user = request.user
-        if user.is_verified:
-            return Response({'detail': 'Email is already verified.'}, status=status.HTTP_400_BAD_REQUEST)
+        email = request.data.get('email', '').strip().lower()
 
-        # Delete old tokens for this user
-        EmailVerificationToken.objects.filter(user=user).delete()
+        try:
+            user = User.objects.get(email=email, is_active=True)
+            if not user.is_verified:
+                # Delete old tokens first (clean slate)
+                EmailVerificationToken.objects.filter(user=user).delete()
+                token      = EmailVerificationToken.objects.create(user=user)
+                verify_url = f"{_frontend()}/verify-email?token={token.token}"
 
-        token        = EmailVerificationToken.objects.create(user=user)
-        frontend_url = getattr(settings, 'FRONTEND_URL', 'http://localhost:5173')
-        verify_url   = f"{frontend_url}/verify-email?token={token.token}"
+                _send(
+                    subject  = 'Verify your SSP account',
+                    body     = (
+                        f"Hi {user.first_name},\n\n"
+                        f"Click the link below to verify your email:\n\n"
+                        f"{verify_url}\n\n"
+                        f"This link expires in 24 hours.\n\n"
+                        f"— SSP Team"
+                    ),
+                    to_email = user.email,
+                )
+        except User.DoesNotExist:
+            pass  # Intentionally silent — prevents enumeration
 
-        send_mail(
-            subject='Verify your SSP account',
-            message=(
-                f"Hi {user.first_name},\n\n"
-                f"Click the link below to verify your email:\n\n"
-                f"{verify_url}\n\n"
-                f"This link expires in 24 hours.\n\n"
-                f"— SSP Team"
-            ),
-            from_email=settings.DEFAULT_FROM_EMAIL,
-            recipient_list=[user.email],
-            fail_silently=False,
-        )
+        return Response({'message': 'If that email is registered and unverified, a new link has been sent.'})
 
-        return Response({'message': 'Verification email sent.'})
 
+# ── Password Reset ────────────────────────────────────────────────────────────
+
+class PasswordResetRequestView(APIView):
+    """
+    POST /api/v1/users/password-reset/
+    Public. Sends a reset link. Always 200 (anti-enumeration).
+    Body: { email }
+    """
+    permission_classes = [permissions.AllowAny]
+
+    def post(self, request):
+        email = request.data.get('email', '').strip().lower()
+
+        try:
+            user = User.objects.get(email=email, is_active=True)
+            # Delete any existing tokens (one valid link at a time)
+            PasswordResetToken.objects.filter(user=user).delete()
+            token     = PasswordResetToken.objects.create(user=user)
+            reset_url = f"{_frontend()}/reset-password?token={token.token}"
+
+            _send(
+                subject  = 'Reset your SSP password',
+                body     = (
+                    f"Hi {user.first_name},\n\n"
+                    f"We received a request to reset your password.\n\n"
+                    f"Click the link below to set a new password:\n\n"
+                    f"{reset_url}\n\n"
+                    f"This link expires in 1 hour.\n\n"
+                    f"If you didn't request this, you can safely ignore this email — "
+                    f"your password won't change.\n\n"
+                    f"— SSP Team"
+                ),
+                to_email = user.email,
+            )
+        except User.DoesNotExist:
+            pass  # Intentionally silent
+
+        return Response({'message': 'If that email is registered, a reset link has been sent.'})
+
+
+class PasswordResetConfirmView(APIView):
+    """
+    POST /api/v1/users/password-reset/confirm/
+    Public. Validates token and sets new password.
+    Body: { token, password, password2 }
+    """
+    permission_classes = [permissions.AllowAny]
+
+    def post(self, request):
+        token_str = request.data.get('token', '').strip()
+        password  = request.data.get('password', '')
+        password2 = request.data.get('password2', '')
+
+        if not token_str:
+            return Response(
+                {'detail': 'Reset token is required.'},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        try:
+            token = PasswordResetToken.objects.select_related('user').get(
+                token=token_str, used=False
+            )
+        except PasswordResetToken.DoesNotExist:
+            return Response(
+                {'detail': 'Invalid or expired reset link.'},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        if token.is_expired():
+            token.delete()
+            return Response(
+                {'detail': 'This reset link has expired. Please request a new one.'},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        if not password:
+            return Response(
+                {'password': ['Password is required.']},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        if password != password2:
+            return Response(
+                {'password': ['Passwords do not match.']},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        try:
+            validate_password(password, token.user)
+        except ValidationError as e:
+            return Response(
+                {'password': e.messages},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        # Commit the new password
+        token.user.set_password(password)
+        token.user.save()
+        token.delete()   # one-time use
+
+        return Response({'message': 'Password reset successfully. You can now log in.'})
+
+
+# ── Account ───────────────────────────────────────────────────────────────────
 
 class CurrentUserView(APIView):
-    """
-    GET   /api/v1/users/me/  → return current user's data
-    PATCH /api/v1/users/me/  → update name fields
-    """
     permission_classes = [permissions.IsAuthenticated]
 
     def get(self, request):
@@ -158,10 +293,6 @@ class CurrentUserView(APIView):
 
 
 class ChangePasswordView(APIView):
-    """
-    POST /api/v1/users/change-password/
-    Body: { old_password, new_password }
-    """
     permission_classes = [permissions.IsAuthenticated]
 
     def post(self, request):
@@ -177,7 +308,6 @@ class ChangePasswordView(APIView):
 # ── Profiles ──────────────────────────────────────────────────────────────────
 
 class StudentProfileView(generics.RetrieveUpdateAPIView):
-    """GET/PATCH /api/v1/users/profile/student/"""
     serializer_class   = StudentProfileSerializer
     permission_classes = [permissions.IsAuthenticated]
 
@@ -187,14 +317,12 @@ class StudentProfileView(generics.RetrieveUpdateAPIView):
 
 
 class StudentProfileDetailView(generics.RetrieveAPIView):
-    """GET /api/v1/users/students/<pk>/ — public student profile for sponsors"""
     queryset           = StudentProfile.objects.select_related('user').all()
     serializer_class   = StudentProfileSerializer
     permission_classes = [permissions.IsAuthenticated]
 
 
 class SponsorProfileView(generics.RetrieveUpdateAPIView):
-    """GET/PATCH /api/v1/users/profile/sponsor/"""
     serializer_class   = SponsorProfileSerializer
     permission_classes = [permissions.IsAuthenticated]
 
@@ -206,7 +334,6 @@ class SponsorProfileView(generics.RetrieveUpdateAPIView):
 
 
 class FacultyProfileView(generics.RetrieveUpdateAPIView):
-    """GET/PATCH /api/v1/users/profile/faculty/"""
     serializer_class   = FacultyProfileSerializer
     permission_classes = [permissions.IsAuthenticated]
 
@@ -218,20 +345,16 @@ class FacultyProfileView(generics.RetrieveUpdateAPIView):
 # ── Admin ─────────────────────────────────────────────────────────────────────
 
 class AdminUserListView(generics.ListAPIView):
-    """GET /api/v1/users/admin/users/?role=student"""
     serializer_class   = UserSerializer
     permission_classes = [permissions.IsAuthenticated, IsAdminUser]
 
     def get_queryset(self):
         qs   = User.objects.all()
         role = self.request.query_params.get('role')
-        if role:
-            qs = qs.filter(role=role)
-        return qs
+        return qs.filter(role=role) if role else qs
 
 
 class AdminUserDetailView(generics.RetrieveUpdateDestroyAPIView):
-    """GET/PATCH/DELETE /api/v1/users/admin/users/<pk>/"""
     queryset           = User.objects.all()
     serializer_class   = UserSerializer
     permission_classes = [permissions.IsAuthenticated, IsAdminUser]
