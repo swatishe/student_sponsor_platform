@@ -2,8 +2,12 @@
 apps/users/models.py
 ────────────────────
 Custom User model (email-based auth) + role-specific profile models
-+ EmailVerificationToken for email verification on signup.
++ EmailVerificationToken + PasswordResetToken (with `used` field).
 @author: sshende
+
+FIX: Added `used = models.BooleanField(default=False)` to PasswordResetToken.
+     views.py queries `.get(token=x, used=False)` — without this field the
+     query raises FieldError → 500.
 """
 
 import uuid
@@ -29,14 +33,12 @@ class UserManager(BaseUserManager):
         extra_fields.setdefault('is_staff',     True)
         extra_fields.setdefault('is_superuser', True)
         extra_fields.setdefault('role',         User.Role.ADMIN)
-        extra_fields.setdefault('is_verified',  True)  # superusers are pre-verified
+        extra_fields.setdefault('is_verified',  True)
         return self.create_user(email, password, **extra_fields)
 
 
 class User(AbstractBaseUser, PermissionsMixin):
-    """
-    Platform User. EMAIL is the unique identifier.
-    """
+    """Platform User. EMAIL is the unique identifier."""
 
     class Role(models.TextChoices):
         STUDENT = 'student', 'Student'
@@ -51,7 +53,7 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     is_active   = models.BooleanField(default=True)
     is_staff    = models.BooleanField(default=False)
-    is_verified = models.BooleanField(default=False)  # True after email verification
+    is_verified = models.BooleanField(default=False)
 
     date_joined = models.DateTimeField(default=timezone.now)
 
@@ -74,27 +76,18 @@ class User(AbstractBaseUser, PermissionsMixin):
         return self.first_name
 
     @property
-    def is_student(self):
-        return self.role == self.Role.STUDENT
-
+    def is_student(self):    return self.role == self.Role.STUDENT
     @property
-    def is_sponsor(self):
-        return self.role == self.Role.SPONSOR
-
+    def is_sponsor(self):    return self.role == self.Role.SPONSOR
     @property
-    def is_faculty(self):
-        return self.role == self.Role.FACULTY
-
+    def is_faculty(self):    return self.role == self.Role.FACULTY
     @property
-    def is_admin_user(self):
-        return self.role == self.Role.ADMIN
+    def is_admin_user(self): return self.role == self.Role.ADMIN
 
 
 class EmailVerificationToken(models.Model):
-    """
-    One-time token sent to users on registration to verify their email.
-    Expires after 24 hours.
-    """
+    """One-time token for email verification. Expires after 24 hours."""
+
     user       = models.ForeignKey(User, on_delete=models.CASCADE, related_name='verification_tokens')
     token      = models.UUIDField(default=uuid.uuid4, unique=True, editable=False)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -106,17 +99,22 @@ class EmailVerificationToken(models.Model):
         return f'VerificationToken for {self.user.email}'
 
     def is_expired(self):
-        """Token is valid for 24 hours."""
         return timezone.now() > self.created_at + timedelta(hours=24)
+
 
 class PasswordResetToken(models.Model):
     """
     One-time token emailed to users who request a password reset.
     Expires after 1 hour. Deleted on use.
+
+    FIX: `used` field added — views.py filters on `used=False` to reject
+    already-used tokens. Without this field, the query raises FieldError → 500.
     """
+
     user       = models.ForeignKey(User, on_delete=models.CASCADE, related_name='password_reset_tokens')
     token      = models.UUIDField(default=uuid.uuid4, unique=True, editable=False)
     created_at = models.DateTimeField(auto_now_add=True)
+    used       = models.BooleanField(default=False)   # ← THIS WAS MISSING
 
     class Meta:
         db_table = 'password_reset_tokens'
@@ -125,9 +123,8 @@ class PasswordResetToken(models.Model):
         return f'PasswordResetToken for {self.user.email}'
 
     def is_expired(self):
-        """Token is valid for 1 hour."""
-        return timezone.now() > self.created_at + timedelta(hours=1)    
-    
+        return timezone.now() > self.created_at + timedelta(hours=1)
+
 
 class StudentProfile(models.Model):
     user          = models.OneToOneField(User, on_delete=models.CASCADE, related_name='student_profile')
