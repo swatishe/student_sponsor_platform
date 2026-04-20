@@ -325,8 +325,59 @@ class AdminUserListView(generics.ListAPIView):
         role = self.request.query_params.get('role')
         return qs.filter(role=role) if role else qs
 
-
 class AdminUserDetailView(generics.RetrieveUpdateDestroyAPIView):
+    """
+    GET/PATCH/DELETE /api/v1/users/admin/users/<pk>/
+
+    PATCH with { is_active: false } → logs DEACTIVATE
+    PATCH with { is_active: true  } → logs ACTIVATE
+    DELETE                          → logs DELETE
+    """
     queryset           = User.objects.all()
     serializer_class   = UserSerializer
     permission_classes = [permissions.IsAuthenticated, IsAdminUser]
+
+    # Lazy import to avoid circular imports at module load time
+    @staticmethod
+    def _log(request, action, target_user, description):
+        try:
+            from apps.core.models import log_activity
+            log_activity(
+                request,
+                action        = action,
+                resource_type = 'user',
+                resource_id   = target_user.pk,
+                description   = description,
+            )
+        except Exception as e:
+            logger.warning('ActivityLog write failed: %s', e)
+
+    def perform_destroy(self, instance):
+        self._log(
+            self.request,
+            action      = 'delete',
+            target_user = instance,
+            description = f'Admin deleted user "{instance.get_full_name()}" ({instance.email})',
+        )
+        instance.delete()
+
+    def partial_update(self, request, *args, **kwargs):
+        instance    = self.get_object()
+        was_active  = instance.is_active
+        response    = super().partial_update(request, *args, **kwargs)
+
+        # Only log when is_active actually changed
+        new_active = request.data.get('is_active')
+        if new_active is not None:
+            toggled_to = bool(new_active)
+            if toggled_to != was_active:
+                action = 'activate' if toggled_to else 'deactivate'
+                verb   = 'activated' if toggled_to else 'deactivated'
+                self._log(
+                    request,
+                    action      = action,
+                    target_user = instance,
+                    description = f'Admin {verb} user "{instance.get_full_name()}" ({instance.email})',
+                )
+
+        return response
