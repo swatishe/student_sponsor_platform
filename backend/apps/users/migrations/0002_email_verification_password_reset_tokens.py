@@ -45,6 +45,7 @@ class Migration(migrations.Migration):
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('token', models.UUIDField(default=uuid.uuid4, editable=False, unique=True)),
                 ('created_at', models.DateTimeField(auto_now_add=True)),
+                ('used', models.BooleanField(default=False)),
                 ('user', models.ForeignKey(
                     on_delete=django.db.models.deletion.CASCADE,
                     related_name='password_reset_tokens',
