@@ -30,6 +30,9 @@ urlpatterns = [
 
     # ── Admin tools (projects + activity log) ─────────────────  
     path('api/v1/admin/',        include('apps.core.urls')),
+
+    # Discussion forum
+    path('api/v1/forum/',        include('apps.forum.urls')),   
 ]
 
 # Serve media files in development
