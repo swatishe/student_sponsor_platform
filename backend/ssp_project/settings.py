@@ -124,13 +124,15 @@ SIMPLE_JWT = {
 # ── CORS — set to your Vercel URL after deploying frontend ───────
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",
-    "https://student-sponsor-platform-frontend.vercel.app"
+    "https://student-sponsor-platform-frontend.vercel.app",
+    "https://student-sponsor-platform-frontend-5ld5c2inv.vercel.app"
 ]
 
 CORS_ALLOW_CREDENTIALS = True
 
 CSRF_TRUSTED_ORIGINS = [
-    "https://student-sponsor-platform-frontend.vercel.app"
+    "https://student-sponsor-platform-frontend.vercel.app",
+    "https://student-sponsor-platform-frontend-5ld5c2inv.vercel.app"
 ]
 
 STATIC_URL  = '/static/'
