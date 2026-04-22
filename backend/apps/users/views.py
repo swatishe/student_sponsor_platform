@@ -19,6 +19,7 @@ from rest_framework import generics, permissions, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from django.contrib.auth import get_user_model
+import uuid    
 
 from .models import (
     StudentProfile, SponsorProfile, FacultyProfile,
@@ -127,7 +128,15 @@ class VerifyEmailView(APIView):
             )
 
         try:
-            token = EmailVerificationToken.objects.select_related('user').get(token=token_str)
+            token_uuid = uuid.UUID(str(token_str))
+        except (ValueError, AttributeError):
+            return Response(
+                {'detail': 'This verification link is invalid or has already been used.'},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+        try:
+            token = EmailVerificationToken.objects.select_related('user').get(token=token_uuid)
         except EmailVerificationToken.DoesNotExist:
             # 404 — token never existed or was already used/deleted
             return Response(
@@ -164,10 +173,13 @@ class ResendVerificationView(APIView):
 
         try:
             user = User.objects.get(email=email, is_active=True)
-            if not user.is_verified:
+            if user.is_verified:
+                logger.info('Resend requested for already-verified user: %s', email)
+            else:
                 EmailVerificationToken.objects.filter(user=user).delete()
                 token      = EmailVerificationToken.objects.create(user=user)
                 verify_url = f"{_frontend()}/verify-email?token={token.token}"
+                logger.info('Resend → new link for %s: %s', email, verify_url)
                 _send(
                     subject  = 'Verify your SSP account',
                     body     = (
@@ -180,7 +192,7 @@ class ResendVerificationView(APIView):
                     to_email = user.email,
                 )
         except User.DoesNotExist:
-            pass  # silent
+            logger.info('Resend requested for unknown email: %s', email)  
 
         return Response({'message': 'If that email is registered and unverified, a new link has been sent.'})
 
