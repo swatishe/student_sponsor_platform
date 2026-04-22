@@ -40,4 +40,5 @@ class ConversationSerializer(serializers.ModelSerializer):
 """StartConversationSerializer is a simple serializer for initiating a new conversation with a recipient and an initial message."""
 class StartConversationSerializer(serializers.Serializer):
     recipient_id = serializers.IntegerField()
-    message      = serializers.CharField(min_length=1, max_length=5000)
+    message      = serializers.CharField(min_length=0, max_length=5000, allow_blank=True, required=False, default='')
+

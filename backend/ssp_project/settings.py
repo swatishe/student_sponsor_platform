@@ -36,6 +36,7 @@ INSTALLED_APPS = [
     'apps.applications',
     'apps.messaging',
     'apps.core',
+    'apps.forum', 
 ]
 
 MIDDLEWARE = [
@@ -123,13 +124,15 @@ SIMPLE_JWT = {
 # ── CORS — set to your Vercel URL after deploying frontend ───────
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",
-    "https://student-sponsor-platform-frontend.vercel.app"
+    "https://student-sponsor-platform-frontend.vercel.app",
+    "https://student-sponsor-platform-frontend-5ld5c2inv.vercel.app"
 ]
 
 CORS_ALLOW_CREDENTIALS = True
 
 CSRF_TRUSTED_ORIGINS = [
-    "https://student-sponsor-platform-frontend.vercel.app"
+    "https://student-sponsor-platform-frontend.vercel.app",
+    "https://student-sponsor-platform-frontend-5ld5c2inv.vercel.app"
 ]
 
 STATIC_URL  = '/static/'
@@ -151,6 +154,38 @@ USE_I18N      = True
 USE_TZ        = True
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-EMAIL_BACKEND      = 'django.core.mail.backends.console.EmailBackend'
-DEFAULT_FROM_EMAIL = config('DEFAULT_FROM_EMAIL', default='noreply@ssp.com')
+EMAIL_BACKEND      = config('EMAIL_BACKEND', default='django.core.mail.backends.console.EmailBackend')
+DEFAULT_FROM_EMAIL = config('DEFAULT_FROM_EMAIL', default='SSP Platform <noreply@ssp.com>')
 FRONTEND_URL       = config('FRONTEND_URL', default='http://localhost:5173')
+
+# SMTP (for production email)
+EMAIL_HOST          = config('EMAIL_HOST', default='')
+EMAIL_PORT          = config('EMAIL_PORT', default=587, cast=int)
+EMAIL_USE_TLS       = config('EMAIL_USE_TLS', default=True, cast=bool)
+EMAIL_HOST_USER     = config('EMAIL_HOST_USER', default='')
+EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD', default='')
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'simple': {'format': '[%(levelname)s] %(name)s: %(message)s'},
+    },
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+            'formatter': 'simple',
+        },
+    },
+    'loggers': {
+        'apps.users.views': {
+            'handlers': ['console'],
+            'level': 'DEBUG' if DEBUG else 'WARNING',
+            'propagate': False,
+        },
+    },
+    'root': {
+        'handlers': ['console'],
+        'level': 'INFO',
+    },
+}

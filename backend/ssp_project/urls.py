@@ -27,6 +27,12 @@ urlpatterns = [
     path('api/v1/projects/',     include('apps.projects.urls')),
     path('api/v1/applications/', include('apps.applications.urls')),
     path('api/v1/messages/',     include('apps.messaging.urls')),
+
+    # ── Admin tools (projects + activity log) ─────────────────  
+    path('api/v1/admin/',        include('apps.core.urls')),
+
+    # Discussion forum
+    path('api/v1/forum/',        include('apps.forum.urls')),   
 ]
 
 # Serve media files in development
