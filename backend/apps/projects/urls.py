@@ -5,10 +5,20 @@ URL patterns for the Projects app. Defines endpoints for listing/creating projec
 @author sshende
 """
 from django.urls import path
-from .views import ProjectListCreateView, ProjectDetailView, MyProjectsView
+from .views import (
+    ProjectListCreateView,
+    ProjectDetailView,
+    MyProjectsView,
+    SavedProjectListView,
+    SavedProjectSaveView, 
+)
 
 urlpatterns = [
-    path('',          ProjectListCreateView.as_view(), name='project-list-create'),
-    path('mine/',     MyProjectsView.as_view(),        name='my-projects'),
-    path('<int:pk>/', ProjectDetailView.as_view(),     name='project-detail'),
+    # Core project endpoints
+    path('',       ProjectListCreateView.as_view(), name='project-list-create'),
+    path('mine/',  MyProjectsView.as_view(),        name='my-projects'),
+    path('saved/', SavedProjectListView.as_view(),  name='saved-projects'),
+
+    path('<int:pk>/',      ProjectDetailView.as_view(),    name='project-detail'),
+    path('<int:pk>/save/', SavedProjectSaveView.as_view(), name='project-save'),  
 ]
