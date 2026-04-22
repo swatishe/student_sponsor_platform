@@ -64,12 +64,14 @@ class StartConversationView(APIView):
         conversation, created = Conversation.get_or_create_between(request.user, recipient)
 
         # Create the opening message
-        Message.objects.create(
-            conversation=conversation,
-            sender=request.user,
-            content=content,
-        )
-        conversation.save()   # bump updated_at
+        if content:
+            Message.objects.create(
+                conversation=conversation,
+                sender=request.user,
+                content=content,
+            )
+            conversation.save()  # bump updated_at
+
 
         return Response(
             ConversationSerializer(conversation, context={'request': request}).data,
