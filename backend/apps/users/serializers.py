@@ -10,6 +10,7 @@ from django.contrib.auth.password_validation import validate_password
 from .models import User, StudentProfile, SponsorProfile, FacultyProfile
 
 
+# RegisterSerializer is used for POST /api/v1/users/register/ — it creates a new user and automatically creates the corresponding profile based on the user's role. It includes validation to ensure that the password and password confirmation match, and it uses Django's built-in password validators to enforce strong passwords. The create method handles the logic of creating the user and the appropriate profile in one step, simplifying the registration process for the frontend.
 class RegisterSerializer(serializers.ModelSerializer):
     """Used for POST /api/v1/users/register/ — creates user + auto-creates profile."""
 
@@ -42,7 +43,7 @@ class RegisterSerializer(serializers.ModelSerializer):
 
         return user
 
-
+#    UserSerializer is a lightweight read serializer for the User model, designed to be safely nested inside other serializers without exposing sensitive information. It includes a method to return the user's full name by combining the first and last name fields. The read_only_fields ensure that certain fields cannot be modified through this serializer, making it suitable for use in nested representations where only basic user information is needed.   
 class UserSerializer(serializers.ModelSerializer):
     """Lightweight read serializer — safe to nest inside other serializers."""
 
@@ -57,7 +58,7 @@ class UserSerializer(serializers.ModelSerializer):
     def get_full_name(self, obj):
         return obj.get_full_name()
 
-
+#   Profile serializers for each role. Each includes a nested UserSerializer for the related user information, and any additional fields specific to that profile type. The skills_list and tags_list methods convert the stored comma-separated strings into lists for easier handling on the frontend. These serializers are used for profile CRUD operations, allowing users to view and update their profile information while keeping the user data nested and organized.
 class StudentProfileSerializer(serializers.ModelSerializer):
     """Full student profile — includes nested user info + skills list."""
 
@@ -73,6 +74,7 @@ class StudentProfileSerializer(serializers.ModelSerializer):
         return obj.get_skills_list()
 
 
+#   Profile serializers for each role. Each includes a nested UserSerializer for the related user information, and any additional fields specific to that profile type. The skills_list and tags_list methods convert the stored comma-separated strings into lists for easier handling on the frontend. These serializers are used for profile CRUD operations, allowing users to view and update their profile information while keeping the user data nested and organized.
 class SponsorProfileSerializer(serializers.ModelSerializer):
     """Full sponsor profile."""
 
@@ -83,7 +85,7 @@ class SponsorProfileSerializer(serializers.ModelSerializer):
         fields = '__all__'
         read_only_fields = ('user', 'created_at', 'updated_at')
 
-
+#  Profile serializers for each role. Each includes a nested UserSerializer for the related user information, and any additional fields specific to that profile type. The skills_list and tags_list methods convert the stored comma-separated strings into lists for easier handling on the frontend. These serializers are used for profile CRUD operations, allowing users to view and update their profile information while keeping the user data nested and organized.
 class FacultyProfileSerializer(serializers.ModelSerializer):
     """Full faculty profile."""
 
@@ -95,6 +97,7 @@ class FacultyProfileSerializer(serializers.ModelSerializer):
         read_only_fields = ('user', 'created_at', 'updated_at')
 
 
+#  ChangePasswordSerializer is used for POST /api/v1/users/change-password/. It requires the user to provide their current password and a new password. The validate_old_password method checks if the provided current password is correct, while the new_password field uses Django's built-in password validators to ensure that the new password meets security requirements. This serializer is designed to handle password change requests securely, ensuring that only authenticated users can change their passwords and that the new passwords are strong.
 class ChangePasswordSerializer(serializers.Serializer):
     """Used for POST /api/v1/users/change-password/"""
 

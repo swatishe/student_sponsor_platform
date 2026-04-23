@@ -18,7 +18,8 @@ from .models import Project, SavedProject
 from .serializers import ProjectSerializer, ProjectListSerializer, SavedProjectSerializer
 from apps.users.permissions import IsSponsorOrAdmin
 
-
+"""Views for handling project-related API endpoints. ProjectListCreateView allows listing all projects (with filtering, searching, and ordering) and creating new projects (sponsor/faculty/admin only). ProjectDetailView allows retrieving, updating, or deleting a specific project (only the creator or admin can update/delete). MyProjectsView lists projects created by the current user. SavedProjectListView lists projects saved by the current student. SavedProjectSaveView allows students to save or unsave a project, with idempotent POST and DELETE methods to toggle the saved status. Each view is designed to handle specific aspects of project management while enforcing appropriate permissions and providing necessary functionality for the frontend to interact with projects effectively.
+"""
 class ProjectListCreateView(generics.ListCreateAPIView):
     """
     GET  /api/v1/projects/   — list (students see only OPEN)
@@ -56,7 +57,7 @@ class ProjectListCreateView(generics.ListCreateAPIView):
     def perform_create(self, serializer):
         serializer.save(created_by=self.request.user)
 
-
+"""GET /api/v1/projects/<pk>/ — retrieve project details. PATCH/DELETE allowed only for creator or admin."""
 class ProjectDetailView(generics.RetrieveUpdateDestroyAPIView):
     """GET / PATCH / DELETE /api/v1/projects/<pk>/"""
     queryset           = Project.objects.select_related('created_by').all()
@@ -69,7 +70,7 @@ class ProjectDetailView(generics.RetrieveUpdateDestroyAPIView):
             if obj.created_by != request.user and not request.user.is_admin_user:
                 raise PermissionDenied('Only the project creator can edit or delete this project.')
 
-
+"""GET /api/v1/projects/mine/ — list projects created by the current user."""
 class MyProjectsView(generics.ListAPIView):
     """GET /api/v1/projects/mine/"""
     serializer_class   = ProjectListSerializer
@@ -95,6 +96,7 @@ class SavedProjectListView(generics.ListAPIView):
         )
 
 
+"""GET/POST/DELETE /api/v1/projects/<pk>/save/ — toggle saved status for a project. GET checks if saved, POST saves, DELETE unsaves. Idempotent endpoints for frontend convenience."""
 class SavedProjectSaveView(APIView):
     """
     GET    /api/v1/projects/<pk>/save/  → { saved: true/false }   check status

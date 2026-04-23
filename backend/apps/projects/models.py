@@ -9,7 +9,10 @@ Students browse and apply to open projects.
 from django.db import models
 from django.conf import settings
 
-
+"""
+    The Project model represents a project offering created by sponsors or faculty members. It includes fields for the project's title, description, requirements, type, status, and other relevant information. The model also defines relationships to the user who created the project and tracks timestamps for creation and updates. The SavedProject model allows students to bookmark projects they are interested in, with a unique constraint to prevent duplicate saves. Both models include string representations for easy identification in the admin interface and other contexts. The Project model also includes a method to return a list of tags and a property to count the number
+of applications associated with the project, providing useful functionality for displaying project details and managing applications. The models are designed to support the core functionality of the projects app, enabling students to find and apply to projects while allowing sponsors and faculty to manage their offerings effectively.
+"""
 class Project(models.Model):
 
     class Status(models.TextChoices):

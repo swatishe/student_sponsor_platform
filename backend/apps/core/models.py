@@ -9,7 +9,7 @@ Written automatically via the log_activity() helper called from views.
 from django.db import models
 from django.conf import settings
 
-
+#   ActivityLog records all important actions on the platform, such as creating/updating/deleting projects, applying to projects, user logins/logouts, and admin actions. Each log entry captures who did it (actor), what they did (action), on what resource (resource_type + resource_id), when they did it (timestamp), and from where (ip_address). The log_activity() helper function can be called from any view to easily create a new log entry without needing to manually construct the ActivityLog object each time. This centralized logging mechanism is crucial for auditing, debugging, and monitoring platform activity over time.
 class ActivityLog(models.Model):
 
     class Action(models.TextChoices):

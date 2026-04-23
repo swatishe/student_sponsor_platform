@@ -26,7 +26,7 @@ User = get_user_model()
 
 
 # ── Admin: Project list + delete ──────────────────────────────────────────────
-
+# AdminProjectListView provides a paginated list of all projects with optional filtering by status and project type, as well as search by title and creator name. AdminProjectDeleteView allows admins to delete a specific project by its primary key (id) and automatically logs this action in the ActivityLog for auditing purposes. Both views are protected by IsAuthenticated and IsAdminUser permissions to ensure that only authorized admin users can access these endpoints. The serializers used in these views provide a structured representation of the project data for API responses.  
 class AdminProjectListView(generics.ListAPIView):
     """
     GET /api/v1/admin/projects/
@@ -44,6 +44,7 @@ class AdminProjectListView(generics.ListAPIView):
         return Project.objects.select_related('created_by').all()
 
 
+# AdminProjectDeleteView allows admins to delete a specific project by its primary key (id) and automatically logs this action in the ActivityLog for auditing purposes. Both views are protected by IsAuthenticated and IsAdminUser permissions to ensure that only authorized admin users can access these endpoints. The serializers used in these views provide a structured representation of the project data for API responses.
 class AdminProjectDeleteView(generics.DestroyAPIView):
     """
     DELETE /api/v1/admin/projects/<pk>/
@@ -65,7 +66,7 @@ class AdminProjectDeleteView(generics.DestroyAPIView):
 
 
 # ── Admin: Activity log ───────────────────────────────────────────────────────
-
+#       ActivityLogListView provides a paginated list of activity log entries with optional filtering by action type, resource type, and free-text search on actor name and description. This view is protected by IsAuthenticated and IsAdminUser permissions to ensure that only authorized admin users can access the activity logs for auditing purposes. The ActivityLogSerializer is used to serialize the log entries for API responses, providing a structured representation of the activity data. Admins can use this endpoint to monitor platform activity, investigate issues, and maintain an audit trail of important actions taken on the platform over time.    
 class ActivityLogListView(generics.ListAPIView):
     """
     GET /api/v1/admin/activity-logs/

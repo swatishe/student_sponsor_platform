@@ -15,7 +15,9 @@ from .models import DiscussionThread, Post
 from .serializers import ThreadListSerializer, ThreadDetailSerializer, PostSerializer
 from apps.users.permissions import IsFacultyOrAdmin, IsAdminUser
 
-
+"""
+    ThreadListCreateView handles both listing all discussion threads and creating new threads. The GET method returns a list of threads, optionally filtered by department, while the POST method allows faculty or admin users to create a new thread. ThreadDetailView provides endpoints for retrieving, updating, or deleting a specific thread, with permissions ensuring that only the thread creator or an admin can modify it. PostListCreateView manages the creation and listing of top-level posts within a thread, while PostRepliesView handles replies to specific posts. PostDetailView allows users to edit or delete their own posts, with admins having the ability to delete any post. AdminFlagPostView provides an endpoint for admins to toggle the flagged status of a post for moderation purposes. Each view uses appropriate serializers to structure the data for API responses and includes permission checks to enforce access control based on user roles and ownership of content.
+"""
 class ThreadListCreateView(generics.ListCreateAPIView):
     """
     GET  /api/v1/forum/threads/   – list threads (all authenticated)
@@ -40,7 +42,10 @@ class ThreadListCreateView(generics.ListCreateAPIView):
     def perform_create(self, serializer):
         serializer.save(created_by=self.request.user)
 
+"""
+    ThreadDetailView provides endpoints for retrieving, updating, or deleting a specific thread, with permissions ensuring that only the thread creator or an admin can modify it. PostListCreateView manages the creation and listing of top-level posts within a thread, while PostRepliesView handles replies to specific posts. PostDetailView allows users to edit or delete their own posts, with admins having the ability to delete any post. AdminFlagPostView provides an endpoint for admins to toggle the flagged status of a post for moderation purposes. Each view uses appropriate serializers to structure the data for API responses and includes permission checks to enforce access control based on user roles and ownership of content.   
 
+"""
 class ThreadDetailView(generics.RetrieveUpdateDestroyAPIView):
     """
     GET    /api/v1/forum/threads/<pk>/
@@ -57,7 +62,9 @@ class ThreadDetailView(generics.RetrieveUpdateDestroyAPIView):
             if obj.created_by != request.user and not request.user.is_admin_user:
                 raise PermissionDenied('Only the thread creator or admin can edit this thread.')
 
-
+""""
+    PostListCreateView manages the creation and listing of top-level posts within a thread, while PostRepliesView handles replies to specific posts. PostDetailView allows users to edit or delete their own posts, with admins having the ability to delete any post. AdminFlagPostView provides an endpoint for admins to toggle the flagged status of a post for moderation purposes. Each view uses appropriate serializers to structure the data for API responses and includes permission checks to enforce access control based on user roles and ownership of content.
+"""
 class PostListCreateView(generics.ListCreateAPIView):
     """
     GET  /api/v1/forum/threads/<thread_pk>/posts/  – top-level posts
@@ -78,6 +85,9 @@ class PostListCreateView(generics.ListCreateAPIView):
         serializer.save(author=self.request.user, thread=thread)
 
 
+"""
+    PostListCreateView manages the creation and listing of top-level posts within a thread, while PostRepliesView handles replies to specific posts. PostDetailView allows users to edit or delete their own posts, with admins having the ability to delete any post. AdminFlagPostView provides an endpoint for admins to toggle the flagged status of a post for moderation purposes. Each view uses appropriate serializers to structure the data for API responses and includes permission checks to enforce access control based on user roles and ownership of content.          
+"""
 class PostRepliesView(generics.ListCreateAPIView):
     """
     GET  /api/v1/forum/posts/<post_pk>/replies/
@@ -97,7 +107,7 @@ class PostRepliesView(generics.ListCreateAPIView):
             raise PermissionDenied('This thread is closed and no longer accepts posts.')
         serializer.save(author=self.request.user, thread=parent.thread, parent=parent)
 
-
+#   PostListCreateView manages the creation and listing of top-level posts within a thread, while PostRepliesView handles replies to specific posts. PostDetailView allows users to edit or delete their own posts, with admins having the ability to delete any post. AdminFlagPostView provides an endpoint for admins to toggle the flagged status of a post for moderation purposes. Each view uses appropriate serializers to structure the data for API responses and includes permission checks to enforce access control based on user roles and ownership of content.  
 class PostDetailView(generics.RetrieveUpdateDestroyAPIView):
     """
     PATCH  /api/v1/forum/posts/<pk>/  – edit own post
@@ -113,7 +123,9 @@ class PostDetailView(generics.RetrieveUpdateDestroyAPIView):
             if obj.author != request.user and not request.user.is_admin_user:
                 raise PermissionDenied('You can only edit or delete your own posts.')
 
-
+"""
+    PostListCreateView manages the creation and listing of top-level posts within a thread, while PostRepliesView handles replies to specific posts. PostDetailView allows users to edit or delete their own posts, with admins having the ability to delete any post. AdminFlagPostView provides an endpoint for admins to toggle the flagged status of a post for moderation purposes. Each view uses appropriate serializers to structure the data for API responses and includes permission checks to enforce access control based on user roles and ownership of content.
+"""
 class AdminFlagPostView(APIView):
     """
     PATCH /api/v1/forum/posts/<pk>/flag/

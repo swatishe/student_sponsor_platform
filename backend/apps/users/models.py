@@ -17,6 +17,8 @@ from django.db import models
 from django.utils import timezone
 
 
+"""Custom user model with email as the unique identifier. Includes role-based profiles for students, sponsors, and faculty. Also defines one-time token models for email verification and password reset, with appropriate fields and methods for handling token expiration and usage. The UserManager class provides methods for creating regular users and superusers, ensuring that the necessary fields are set correctly. The overall structure allows for flexible user management while maintaining security and functionality for authentication and account management within the platform.   
+"""
 class UserManager(BaseUserManager):
     """Custom manager — uses email instead of username."""
 
@@ -36,7 +38,7 @@ class UserManager(BaseUserManager):
         extra_fields.setdefault('is_verified',  True)
         return self.create_user(email, password, **extra_fields)
 
-
+"""Platform User. EMAIL is the unique identifier."""
 class User(AbstractBaseUser, PermissionsMixin):
     """Platform User. EMAIL is the unique identifier."""
 
@@ -85,6 +87,8 @@ class User(AbstractBaseUser, PermissionsMixin):
     def is_admin_user(self): return self.role == self.Role.ADMIN
 
 
+
+"""One-time token for email verification. Expires after 24 hours."""
 class EmailVerificationToken(models.Model):
     """One-time token for email verification. Expires after 24 hours."""
 
@@ -102,6 +106,7 @@ class EmailVerificationToken(models.Model):
         return timezone.now() > self.created_at + timedelta(hours=24)
 
 
+"""One-time token emailed to users who request a password reset. Expires after 1 hour. Deleted on use. `used` field added to prevent reuse of tokens and avoid FieldError in views.py.  """
 class PasswordResetToken(models.Model):
     """
     One-time token emailed to users who request a password reset.
@@ -126,6 +131,7 @@ class PasswordResetToken(models.Model):
         return timezone.now() > self.created_at + timedelta(hours=1)
 
 
+""" StudentProfile extends the User model with student-specific fields like bio, university, major, GPA, skills, resume, and social links. SponsorProfile extends the User model with sponsor-specific fields like company name, industry, website, description, and logo. FacultyProfile extends the User model with faculty-specific fields like department, university, bio, and research interests. Each profile is linked to the User model via a one-to-one relationship, allowing for easy access to user information while keeping role-specific data organized in separate models. This structure supports the different types of users on the platform while maintaining a clean and scalable design."""
 class StudentProfile(models.Model):
     user          = models.OneToOneField(User, on_delete=models.CASCADE, related_name='student_profile')
     bio           = models.TextField(blank=True)
@@ -150,7 +156,7 @@ class StudentProfile(models.Model):
     def get_skills_list(self):
         return [s.strip() for s in self.skills.split(',') if s.strip()]
 
-
+""" SponsorProfile extends the User model with sponsor-specific fields like company name, industry, website, description, and logo. FacultyProfile extends the User model with faculty-specific fields like department, university, bio, and research interests. Each profile is linked to the User model via a one-to-one relationship, allowing for easy access to user information while keeping role-specific data organized in separate models. This structure supports the different types of users on the platform while maintaining a clean and scalable design."""
 class SponsorProfile(models.Model):
     user         = models.OneToOneField(User, on_delete=models.CASCADE, related_name='sponsor_profile')
     company_name = models.CharField(max_length=200)
@@ -167,7 +173,7 @@ class SponsorProfile(models.Model):
     def __str__(self):
         return f'SponsorProfile({self.company_name})'
 
-
+""" FacultyProfile extends the User model with faculty-specific fields like department, university, bio, and research interests. Each profile is linked to the User model via a one-to-one relationship, allowing for easy access to user information while keeping role-specific data organized in separate models. This structure supports the different types of users on the platform while maintaining a clean and scalable design."""
 class FacultyProfile(models.Model):
     user               = models.OneToOneField(User, on_delete=models.CASCADE, related_name='faculty_profile')
     department         = models.CharField(max_length=200, blank=True)
