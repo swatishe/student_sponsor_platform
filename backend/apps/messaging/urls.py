@@ -9,6 +9,7 @@ from .views import (
     MessageListView, SendMessageView,
 )
 
+# URL patterns for the Messaging app, defining endpoints for listing conversations, starting new conversations, listing messages in a conversation, and sending messages. Each endpoint is associated with a specific view that handles the corresponding functionality, allowing users to interact with their conversations and messages through the API.
 urlpatterns = [
     path('conversations/',                              ConversationListView.as_view(),  name='conversation-list'),
     path('start/',                                      StartConversationView.as_view(), name='start-conversation'),

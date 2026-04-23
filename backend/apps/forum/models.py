@@ -9,7 +9,7 @@ Post             — any authenticated user; supports one level of replies.
 from django.db import models
 from django.conf import settings
 
-
+#   DiscussionThread represents a discussion topic created by faculty or admin users. It includes fields for title, description, department, tags, visibility (who can see the thread), pinned status, closed status, creator, and timestamps. The thread can be filtered by department and tagged for easier discovery. The visibility field allows threads to be restricted to certain user groups (e.g., students only). The is_pinned field allows important threads to be highlighted at the top of the list. The is_closed field indicates whether new posts can be added to the thread. Each thread is associated with a creator (the user who created it) and has a timestamp for when it was created and last updated. The post_count property provides a convenient way to get the number of posts in the thread without needing to manually count them each time.
 class DiscussionThread(models.Model):
 
     class Visibility(models.TextChoices):
@@ -42,6 +42,7 @@ class DiscussionThread(models.Model):
         return self.posts.count()
 
 
+#   Post represents a single post in a discussion thread. It includes fields for the thread it belongs to, the author, an optional parent post (for replies), the content of the post, a flag for whether it has been reported for moderation, and timestamps for when it was created and last updated. The parent field allows for one level of replies to posts, enabling threaded discussions. The is_flagged field can be used to indicate that a post has been reported by users and may require moderator review. Each post is associated with an author (the user who created it) and belongs to a specific discussion thread. The __str__ method provides a simple string representation of the post for debugging purposes.
 class Post(models.Model):
     thread     = models.ForeignKey(DiscussionThread, on_delete=models.CASCADE, related_name='posts')
     author     = models.ForeignKey(

@@ -6,5 +6,6 @@ For WebSocket support use daphne with asgi.py instead.
 import os
 from django.core.wsgi import get_wsgi_application
 
+# Set the default Django settings module for the 'wsgi' application.
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'ssp_project.settings')
 application = get_wsgi_application()

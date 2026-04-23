@@ -13,7 +13,9 @@ from rest_framework import serializers
 from .models import Project, SavedProject
 from apps.users.serializers import UserSerializer
 
-
+"""
+    ProjectSerializer is a full serializer for the Project model, used for detailed views and creation/updating. It includes nested user information for the creator, a method to return the list of tags, and validation to ensure that the deadline is a future date. ProjectListSerializer is a lightweight serializer for listing projects with less data, while SavedProjectSerializer nests full project data for saved projects, allowing the frontend to receive all necessary information in one call.
+"""
 class ProjectSerializer(serializers.ModelSerializer):
     """Full project serializer — used for create/detail."""
     created_by        = UserSerializer(read_only=True)
@@ -34,7 +36,7 @@ class ProjectSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError('Deadline must be a future date.')
         return value
 
-
+"""Lightweight serializer for list views."""
 class ProjectListSerializer(serializers.ModelSerializer):
     """Lightweight serializer for list views."""
     created_by = UserSerializer(read_only=True)
@@ -51,7 +53,7 @@ class ProjectListSerializer(serializers.ModelSerializer):
     def get_tags_list(self, obj):
         return obj.get_tags_list()
 
-
+"""Nests full project data so the frontend gets everything in one call."""
 class SavedProjectSerializer(serializers.ModelSerializer):
     """Nests full project data so the frontend gets everything in one call."""
     project  = ProjectListSerializer(read_only=True)

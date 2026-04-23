@@ -158,7 +158,7 @@ class VerifyEmailView(APIView):
 
         return Response({'message': 'Email verified successfully! You can now log in.'})
 
-
+# ── Resend Verification Email ───────────────────────────────────────────────
 class ResendVerificationView(APIView):
     """
     POST /api/v1/users/resend-verification/
@@ -225,7 +225,7 @@ class PasswordResetRequestView(APIView):
             pass
         return Response({'message': 'If that email is registered, a reset link has been sent.'})
 
-
+#    PasswordResetConfirmView handles POST requests to /api/v1/users/password-reset/confirm/. It expects a token and new password in the request body. The view validates the token, checks if it's expired, and if valid, updates the user's password. It returns appropriate HTTP status codes for different error conditions, such as missing token, invalid token, expired token, and password validation errors. On successful password reset, it deletes the token and returns a success message.
 class PasswordResetConfirmView(APIView):
     """POST /api/v1/users/password-reset/confirm/"""
     permission_classes = [permissions.AllowAny]
@@ -278,6 +278,7 @@ class CurrentUserView(APIView):
         return Response(serializer.data)
 
 
+# ChangePasswordView allows authenticated users to change their password by providing their current password and a new password. It validates the current password and ensures the new password meets security requirements before updating it.
 class ChangePasswordView(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
@@ -290,7 +291,7 @@ class ChangePasswordView(APIView):
 
 
 # ── Profiles ──────────────────────────────────────────────────────────────────
-
+#   UserSerializer is a basic serializer for the User model, exposing fields like id, email, first_name, last_name, full_name (computed), role, is_active, is_verified, and date_joined. The id, email, full_name, and date_joined fields are read-only to prevent changes through the API. The get_full_name method computes the full name by combining the first and last names of the user. This serializer is used as a nested serializer in the profile serializers to include user information within the profile data.
 class StudentProfileView(generics.RetrieveUpdateAPIView):
     serializer_class   = StudentProfileSerializer
     permission_classes = [permissions.IsAuthenticated]
@@ -300,12 +301,14 @@ class StudentProfileView(generics.RetrieveUpdateAPIView):
         return profile
 
 
+#   StudentProfileDetailView is a read-only view that allows sponsors to view the profiles of students. It retrieves a StudentProfile instance based on the primary key provided in the URL and includes nested user information through the StudentProfileSerializer. This view is intended for sponsors to access detailed information about student applicants, while the StudentProfileView allows students to manage their own profiles.
 class StudentProfileDetailView(generics.RetrieveAPIView):
     queryset           = StudentProfile.objects.select_related('user').all()
     serializer_class   = StudentProfileSerializer
     permission_classes = [permissions.IsAuthenticated]
 
 
+#  SponsorProfileView and FacultyProfileView are similar to StudentProfileView but for sponsors and faculty members, respectively. They allow authenticated users to retrieve and update their own profiles. If a profile does not exist for the user, it is automatically created with default values (e.g., an empty company name for sponsors). These views use their respective serializers to handle the profile data, which includes nested user information.
 class SponsorProfileView(generics.RetrieveUpdateAPIView):
     serializer_class   = SponsorProfileSerializer
     permission_classes = [permissions.IsAuthenticated]
@@ -317,6 +320,7 @@ class SponsorProfileView(generics.RetrieveUpdateAPIView):
         return profile
 
 
+# FacultyProfileView allows faculty members to retrieve and update their profiles. Similar to SponsorProfileView, it automatically creates a profile if one does not exist for the authenticated user. This view uses the FacultyProfileSerializer to handle the profile data, which includes nested user information.
 class FacultyProfileView(generics.RetrieveUpdateAPIView):
     serializer_class   = FacultyProfileSerializer
     permission_classes = [permissions.IsAuthenticated]
@@ -337,6 +341,7 @@ class AdminUserListView(generics.ListAPIView):
         role = self.request.query_params.get('role')
         return qs.filter(role=role) if role else qs
 
+#   AdminUserDetailView allows admin users to retrieve, update, or delete any user account. It includes logging for account activation, deactivation, and deletion actions. The view uses the UserSerializer for data representation and ensures that only admin users have access to these operations. The perform_destroy method logs the deletion of a user account, while the partial_update method logs changes to the user's active status (activation/deactivation) when the is_active field is updated.
 class AdminUserDetailView(generics.RetrieveUpdateDestroyAPIView):
     """
     GET/PATCH/DELETE /api/v1/users/admin/users/<pk>/

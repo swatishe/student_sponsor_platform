@@ -8,7 +8,7 @@ from .models import Application
 from apps.users.serializers import UserSerializer
 from apps.projects.serializers import ProjectListSerializer
 
-
+#   Full application — includes nested student + project. 
 class ApplicationSerializer(serializers.ModelSerializer):
     """Full application — includes nested student + project."""
 
@@ -33,7 +33,7 @@ class ApplicationSerializer(serializers.ModelSerializer):
             )
         return attrs
 
-
+# Minimal serializer for sponsor/faculty to update status + notes.  Used in ApplicationsReviewView to prevent overposting.
 class ApplicationStatusSerializer(serializers.ModelSerializer):
     """Minimal serializer for sponsor/faculty to update status + notes."""
 
