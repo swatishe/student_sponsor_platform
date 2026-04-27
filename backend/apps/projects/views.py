@@ -16,7 +16,7 @@ from rest_framework import filters
 
 from .models import Project, SavedProject
 from .serializers import ProjectSerializer, ProjectListSerializer, SavedProjectSerializer
-from apps.users.permissions import IsSponsorOrAdmin
+from apps.users.permissions import IsSponsorOrAdmin, IsSponsorOrFacultyOrAdmin
 
 """Views for handling project-related API endpoints. ProjectListCreateView allows listing all projects (with filtering, searching, and ordering) and creating new projects (sponsor/faculty/admin only). ProjectDetailView allows retrieving, updating, or deleting a specific project (only the creator or admin can update/delete). MyProjectsView lists projects created by the current user. SavedProjectListView lists projects saved by the current student. SavedProjectSaveView allows students to save or unsave a project, with idempotent POST and DELETE methods to toggle the saved status. Each view is designed to handle specific aspects of project management while enforcing appropriate permissions and providing necessary functionality for the frontend to interact with projects effectively.
 """
@@ -36,7 +36,7 @@ class ProjectListCreateView(generics.ListCreateAPIView):
 
     def get_permissions(self):
         if self.request.method == 'POST':
-            return [permissions.IsAuthenticated(), IsSponsorOrAdmin()]
+            return [permissions.IsAuthenticated(), IsSponsorOrFacultyOrAdmin()]
         return [permissions.IsAuthenticated()]
 
     def get_queryset(self):
