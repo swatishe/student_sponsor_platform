@@ -7,8 +7,9 @@ from django.urls import path
 from .views import (
     RegisterView, VerifyEmailView, ResendVerificationView,
     CurrentUserView, ChangePasswordView,
-    StudentProfileView, StudentProfileDetailView,
-    SponsorProfileView, FacultyProfileView,
+    StudentProfileView, StudentProfileDetailView, 
+    SponsorProfileView, SponsorProfileDetailView,
+    FacultyProfileView, FacultyProfileDetailView, 
     AdminUserListView, AdminUserDetailView,
     PasswordResetRequestView, PasswordResetConfirmView,
 )
@@ -38,6 +39,10 @@ urlpatterns = [
 
     # Public student detail (for sponsors)
     path('students/<int:pk>/', StudentProfileDetailView.as_view(), name='student-detail'),
+    #   Public sponsor and faculty detail (for students) - optional, can be used to show who posted a project
+    path('sponsors/<int:pk>/',  SponsorProfileDetailView.as_view(), name='sponsor-detail'),
+    #   Public faculty detail (for students) - optional, can be used to show who posted a project
+    path('faculty/<int:pk>/',   FacultyProfileDetailView.as_view(),  name='faculty-detail'),
 
     # Admin
     path('admin/users/',          AdminUserListView.as_view(),   name='admin-user-list'),
