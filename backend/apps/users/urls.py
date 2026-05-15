@@ -5,7 +5,7 @@ Defines URL patterns for user registration, authentication, profile management, 
 
 from django.urls import path
 from .views import (
-    RegisterView, VerifyEmailView, ResendVerificationView,
+    RegisterView, UserSearchView, VerifyEmailView, ResendVerificationView,
     CurrentUserView, ChangePasswordView,
     StudentProfileView, StudentProfileDetailView, 
     SponsorProfileView, SponsorProfileDetailView,
@@ -43,6 +43,10 @@ urlpatterns = [
     path('sponsors/<int:pk>/',  SponsorProfileDetailView.as_view(), name='sponsor-detail'),
     #   Public faculty detail (for students) - optional, can be used to show who posted a project
     path('faculty/<int:pk>/',   FacultyProfileDetailView.as_view(),  name='faculty-detail'),
+
+    # User Search    
+    path('search/', UserSearchView.as_view(), name='user-search'),
+
 
     # Admin
     path('admin/users/',          AdminUserListView.as_view(),   name='admin-user-list'),

@@ -122,3 +122,24 @@ class SendMessageView(generics.CreateAPIView):
             raise PermissionDenied('You are not a participant in this conversation.')
         serializer.save(sender=self.request.user, conversation=conversation)
         conversation.save()
+
+"""DeleteConversationView allows a user to leave a conversation. If they are the last participant, the conversation is deleted entirely."""
+class DeleteConversationView(APIView):
+    """
+    DELETE /api/v1/messages/conversations/<conv_id>/
+    Removes the requesting user from the conversation.
+    If no participants remain, deletes the conversation entirely.
+    """
+    permission_classes = [permissions.IsAuthenticated]
+
+    def delete(self, request, conv_id):
+        try:
+            conv = Conversation.objects.get(id=conv_id, participants=request.user)
+        except Conversation.DoesNotExist:
+            return Response({'detail': 'Not found.'}, status=status.HTTP_404_NOT_FOUND)
+
+        conv.participants.remove(request.user)
+        if conv.participants.count() == 0:
+            conv.delete()
+
+        return Response(status=status.HTTP_204_NO_CONTENT)

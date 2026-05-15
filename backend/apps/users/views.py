@@ -19,6 +19,8 @@ from rest_framework import generics, permissions, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from django.contrib.auth import get_user_model
+from django.db.models import Q
+from django.db import models
 import uuid    
 
 from .models import (
@@ -384,7 +386,22 @@ class FacultyProfileDetailView(generics.RetrieveAPIView):
         self.check_object_permissions(self.request, profile)
         return profile
 
+# ── User Search (for messaging) ───────────────────────────────────────────────
 
+class UserSearchView(generics.ListAPIView):
+    serializer_class   = UserSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        q  = self.request.query_params.get('q', '').strip()
+        qs = User.objects.filter(is_active=True).exclude(id=self.request.user.id)
+        if q:
+            qs = qs.filter(
+                Q(first_name__icontains=q) |   # ← Q not models.Q
+                Q(last_name__icontains=q)  |
+                Q(email__icontains=q)
+            )
+        return qs.order_by('first_name')[:20]
 
 # ── Admin ─────────────────────────────────────────────────────────────────────
 
