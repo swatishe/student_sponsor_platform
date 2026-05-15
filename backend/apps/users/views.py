@@ -301,11 +301,25 @@ class StudentProfileView(generics.RetrieveUpdateAPIView):
         return profile
 
 
-#   StudentProfileDetailView is a read-only view that allows sponsors to view the profiles of students. It retrieves a StudentProfile instance based on the primary key provided in the URL and includes nested user information through the StudentProfileSerializer. This view is intended for sponsors to access detailed information about student applicants, while the StudentProfileView allows students to manage their own profiles.
+# #   StudentProfileDetailView is a read-only view that allows sponsors to view the profiles of students. It retrieves a StudentProfile instance based on the primary key provided in the URL and includes nested user information through the StudentProfileSerializer. This view is intended for sponsors to access detailed information about student applicants, while the StudentProfileView allows students to manage their own profiles.
+# class StudentProfileDetailView(generics.RetrieveAPIView):
+#     queryset           = StudentProfile.objects.select_related('user').all()
+#     serializer_class   = StudentProfileSerializer
+#     permission_classes = [permissions.IsAuthenticated]
+
 class StudentProfileDetailView(generics.RetrieveAPIView):
-    queryset           = StudentProfile.objects.select_related('user').all()
     serializer_class   = StudentProfileSerializer
     permission_classes = [permissions.IsAuthenticated]
+
+    def get_object(self):
+        user_id = self.kwargs['pk']
+        try:
+            profile = StudentProfile.objects.select_related('user').get(user__id=user_id)
+        except StudentProfile.DoesNotExist:
+            from rest_framework.exceptions import NotFound
+            raise NotFound('Student profile not found.')
+        self.check_object_permissions(self.request, profile)
+        return profile
 
 
 #  SponsorProfileView and FacultyProfileView are similar to StudentProfileView but for sponsors and faculty members, respectively. They allow authenticated users to retrieve and update their own profiles. If a profile does not exist for the user, it is automatically created with default values (e.g., an empty company name for sponsors). These views use their respective serializers to handle the profile data, which includes nested user information.
@@ -319,6 +333,26 @@ class SponsorProfileView(generics.RetrieveUpdateAPIView):
         )
         return profile
 
+""" SponsorProfileDetailView is a read-only view that allows students to view the profiles of sponsors. It retrieves a SponsorProfile instance based on the primary key provided in the URL and includes nested user information through the SponsorProfileSerializer. This view is intended for students to access detailed information about sponsor project creators, while the SponsorProfileView allows sponsors to manage their own profiles. The get_object method is overridden to query the SponsorProfile based on the user__id field rather than the profile's primary key, allowing the URL to use the user's ID for easier access. If the profile is not found, it raises a 404 Not Found error. The view also checks object permissions to ensure that the requesting user has the appropriate permissions to view the sponsor profile.   """
+class SponsorProfileDetailView(generics.RetrieveAPIView):
+    """
+    GET /api/v1/users/sponsors/<user_id>/
+    Queries profile by user__id (not profile pk)
+    FIXED: Changed from queryset pattern to get_object() to query by user_id
+    """
+    serializer_class   = SponsorProfileSerializer
+    permission_classes = [permissions.IsAuthenticated]
+ 
+    def get_object(self):
+        user_id = self.kwargs['pk']
+        try:
+            profile = SponsorProfile.objects.select_related('user').get(user__id=user_id)
+        except SponsorProfile.DoesNotExist:
+            from rest_framework.exceptions import NotFound
+            raise NotFound('Sponsor profile not found.')
+        self.check_object_permissions(self.request, profile)
+        return profile
+
 
 # FacultyProfileView allows faculty members to retrieve and update their profiles. Similar to SponsorProfileView, it automatically creates a profile if one does not exist for the authenticated user. This view uses the FacultyProfileSerializer to handle the profile data, which includes nested user information.
 class FacultyProfileView(generics.RetrieveUpdateAPIView):
@@ -328,6 +362,28 @@ class FacultyProfileView(generics.RetrieveUpdateAPIView):
     def get_object(self):
         profile, _ = FacultyProfile.objects.get_or_create(user=self.request.user)
         return profile
+    
+
+# FacultyProfileDetailView is a read-only view that allows students to view the profiles of faculty members. It retrieves a FacultyProfile instance based on the primary key provided in the URL and includes nested user information through the FacultyProfileSerializer. This view is intended for students to access detailed information about faculty project creators.
+class FacultyProfileDetailView(generics.RetrieveAPIView):
+    """
+    GET /api/v1/users/faculty/<user_id>/
+    Queries profile by user__id (not profile pk)
+    FIXED: Changed from queryset pattern to get_object() to query by user_id
+    """
+    serializer_class   = FacultyProfileSerializer
+    permission_classes = [permissions.IsAuthenticated]
+ 
+    def get_object(self):
+        user_id = self.kwargs['pk']
+        try:
+            profile = FacultyProfile.objects.select_related('user').get(user__id=user_id)
+        except FacultyProfile.DoesNotExist:
+            from rest_framework.exceptions import NotFound
+            raise NotFound('Faculty profile not found.')
+        self.check_object_permissions(self.request, profile)
+        return profile
+
 
 
 # ── Admin ─────────────────────────────────────────────────────────────────────
